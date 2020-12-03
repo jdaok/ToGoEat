@@ -1,0 +1,6 @@
+-name	price	avgPrepTime	maxAmt
+Baconator	3.99	5	10
+Double Baconator	4.99	5	10
+Triple Baconator	5.99	5	10
+
+
