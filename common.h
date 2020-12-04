@@ -10,7 +10,24 @@ struct MenuItem
     bool finished = false;
 };
 
-vector<MenuItem> menu;
+vector<MenuItem> MENU;
+
+//Menu Functions
+//todo
+bool loadMenu(vector<MenuItem>& menu)
+{
+
+    //if suscces
+    return true;
+
+    //todo
+    //else
+    //return false;
+}
+void showMenu(const vector<MenuItem>& menu)
+{
+
+}
 
 
 

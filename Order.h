@@ -30,14 +30,16 @@ public:
 
     Order(); //Default Constructor
     void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
-    int generateID();
+    //todo let user type the order
+    bool makeOrder(const vector<MenuItem> &menu);
+    //todo 
+    bool pay();
 
-    //Menu Functions
-    vector<MenuItem> loadMenu(); //Loads Menu
-    void showMenu();
+    int generateID();
 
     //Item Functions
     void addItem(int, int, vector<MenuItem> menu);
+
 
     //Status Functions
     void setStatus(int);
@@ -55,7 +57,8 @@ Order::Order() //Default Constructor
 
     orderID = generateID();
     status = 1;
-    createOrderItems(menu);
+    //todo remark this one. we let user input the menu
+    //createOrderItems(menu);
 }
 
 
@@ -77,6 +80,102 @@ int Order::generateID() //Generates Random ID
     srand((unsigned)time(NULL));
     int ID = rand() % 899999 + 100000;
     return ID;
+}
+
+//todo let user type the order
+bool Order::makeOrder(const vector<MenuItem>& menu)
+{
+    //to do
+    int menuId;
+    
+    showMenu(menu);
+    
+    bool next = false;
+    do
+    {
+        cout << "Please choose the food and input the menu id, type -1 to finish the order, type -2 to cancle the order";
+        cin >> menuId;
+
+        switch (menuId)
+        {
+        case 1:
+        case 2:
+            //call additem
+            //addItem();
+            break;
+        case -1:
+            //finish the order
+            next = true;
+            break;
+        case -2:
+            next = true;
+            break;
+        default:
+            cout << "wrong menu id, please enter";
+
+        }
+       
+    } while (!next);
+
+    //cusomter finish the order
+    if (menuId == -1)
+    {
+        //now need to let customer pay the money
+        //inside the pay function show the price and let 
+        bool ret = pay();
+        if (!ret)
+        {
+            //todo cancle the payment, need to delete the items
+            //deleteItems();
+        }
+        return ret;
+    }
+    else if (menuId == -2)  //customer cancle the order
+    {
+        //todo cancle the payment, need to delete the items
+            //deleteItems();
+        return false;
+    }
+    else
+    {
+        return false;
+    }
+
+
+ 
+
+
+}
+
+//todo
+bool Order::pay()
+{
+    //show the items and their price, the tax(sum of items price*defalut tax rate), total price
+    //let user type to pay
+    int input = 0;
+    while (true)
+    {
+        cout << "Please type 1 to pay, or -1 to cancle";
+        cin >> input;
+        if (input == 1)
+        {
+            cout << "Thank you " << endl;
+            printOrder();
+            return true;
+        }
+        else if (input == -1)
+        {
+            cout << "You cancle the order" << endl;
+            return false;
+        }
+        else
+        {
+            cout << "type the wrong number. Please reenter" << endl;
+        }
+
+    } 
+    
+    
 }
 
 void Order::createOrderItems(vector<MenuItem> menu) // add items to order items randomly
@@ -112,6 +211,8 @@ void Order::createOrderItems(vector<MenuItem> menu) // add items to order items 
     }
 
 }
+
+
 /*
 vector<item> order::loadMenu() //Creates Menu to Read
 {

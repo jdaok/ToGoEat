@@ -106,10 +106,15 @@ int main()
         
         //Todo notice user to chose the food and make order
         //change the random order to user type order
-        Order tempOrder;
-        cout << endl << "----- ORDER #" << tempOrder.orderID << endl; // print order when new one created
-        tempOrder.printOrder();
-        waitLine.push(tempOrder);
+        if (waitLine.size() < config.maxLenWaitQue)
+        {
+            Order tempOrder;
+            bool ret = tempOrder.makeOrder(MENU);
+            if (ret)
+            {
+                waitLine.push(tempOrder);
+            }
+        }
         /*if (time < config.timeAtNewArrStop)
         {
             int arrivalNum = getRandomNumberOfArrivals(config.aveCustArrivalRate);
