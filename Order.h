@@ -12,12 +12,13 @@
 #include <string>
 #include <cstdlib>
 #include <list>
+#include <map>
 #include <vector>
 #include <fstream>
 
 using namespace std;
 
-struct item
+struct menuItem
 {
     string name;
     int idNumber;
@@ -26,7 +27,7 @@ struct item
     int maxAmt;
 };
 
-struct menuItem
+struct item
 {
   string name;
   int idNumber;
@@ -38,11 +39,12 @@ class order
     int orderID;
     int status; //1 = Ordering, 2 = Paying, 3 = Cooking, 4 = Finished
     bool paid;
-    list<item, int> items;
+    //list<item, int> items;
+    map<item, int> items;
     
 public:
     order(); //Default Constructor
-    vector<item> createMenu(); //Show Menu
+    vector<menuItem> createMenu(); //Show Menu
     void readMenu();
     void addItem(int, int);
     void setStatus();
@@ -56,13 +58,14 @@ public:
 
 order::order() //Default Constructor
 {
+  orderID = 0;
   status = 1;
   paid = false;
 }
 
-vector<item> order::createMenu() //Creates Menu to Read
+vector<menuItem> order::createMenu() //Creates Menu to Read
 {
-    vector<item> menu;
+    vector<menuItem> returnMenu;
     ifstream fin;
     fin.open("menu.txt");
   
@@ -88,7 +91,7 @@ vector<item> order::createMenu() //Creates Menu to Read
       const string avgPrepTime((token = strtok(0, tab)) ? token : "");
       const string maxAmt((token = strtok(0, tab)) ? token : "");
 
-      item tempItem;
+      menuItem tempItem;
       tempItem.name = name;
       tempItem.idNumber = itemID;
       itemID++;
@@ -97,12 +100,12 @@ vector<item> order::createMenu() //Creates Menu to Read
       tempItem.maxAmt = stoi(maxAmt);
     }
   
-  return menu;
+  return returnMenu;
 }
 
 void order::readMenu() //Reads Menu
 {
-  vector<item> menu = createMenu();
+  vector<menuItem> menu = createMenu();
   
   for(auto& it: menu)
   {
@@ -114,8 +117,8 @@ void order::readMenu() //Reads Menu
 
 void order::addItem(int idNumber, int amount) //Adds Item to Order
 {
-    menuItem tempItem;
-    vector<item> menu = createMenu();
+    item tempItem;
+    vector<menuItem> menu = createMenu();
     for(auto& it: menu)
     {
       if(it.idNumber == idNumber)
@@ -123,7 +126,7 @@ void order::addItem(int idNumber, int amount) //Adds Item to Order
         tempItem.name = it.name;
         tempItem.idNumber = it.idNumber;
         tempItem.amount = amount;
-        items.insert(tempItem);
+        items.insert(pair<item, int>(tempItem, amount));
         break;
       }
     }
@@ -133,10 +136,17 @@ void order::getSummary() //Returns Summary
 {
   cout << endl;
   cout << "Order #" << orderID << " - " << endl;
-  for(auto& it: this->items)
+  
+  map<item, int>::iterator it;
+  for(it = items.begin(); it != items.end(); it++)
+  {
+    cout << it->first.idNumber << " " << it->first.name << " (" << it->first.amount << ")" << endl;
+  }
+  
+  /*for(auto& it: this->items)
     {
-      cout << it.idNumber << " " << it.name << " (" << it.amount << ")" << endl;
-    }
+      
+    }*/
 }
 
 string order::reportStatus() //Returns Order Status
@@ -155,6 +165,7 @@ string order::reportStatus() //Returns Order Status
       break;
     case 4:
       returnValue = "Status: Order Finished";
+      break;
     default:
       returnValue = "No Status";
   }
