@@ -45,8 +45,7 @@ public:
     vector<menuItem> createMenu(); //Show Menu
     void readMenu();
     void addItem(int, int);
-    void setStatus();
-    int getStatus();
+    void setStatus(int);
     string reportStatus();
     void getSummary();
     void pay(double);
@@ -144,6 +143,11 @@ void order::getSummary() //Returns Summary
     cout << it->first.idNumber << " " << it->first.name << " (" << it->second << ")" << endl;
   }
   cout << endl;
+}
+
+void order::setStatus(int setValue) //Set Value of Status
+{
+  status = setValue;
 }
 
 string order::reportStatus() //Returns Order Status
