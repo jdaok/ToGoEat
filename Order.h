@@ -12,6 +12,7 @@
 #include <string>
 #include <cstdlib>
 #include <map>
+#include <queue>
 #include <vector>
 #include <fstream>
 
@@ -32,6 +33,7 @@ class order
     int status; //1 = Ordering, 2 = Paying, 3 = Cooking, 4 = Finished
     bool paid;
     map<item, int> items; //Int is for amount
+    //queue<item> items;
     
 public:
     order(); //Default Constructor
@@ -39,8 +41,8 @@ public:
     int generateID();
   
   //Menu Functions
-    vector<item> createMenu(); //Show Menu
-    void readMenu();
+    vector<item> loadMenu(); //Loads Menu
+    void showMenu();
   
   //Item Functions
     void addItem(int, int);
@@ -74,7 +76,7 @@ order order::createOrder()
 {
   srand((unsigned)time(NULL));
   order newOrder;
-  vector<item> menu = createMenu();
+  vector<item> menu = loadMenu();
   for(auto& it: menu)
   {
     int amount = rand() % it.maxAmt;
@@ -83,7 +85,7 @@ order order::createOrder()
   return newOrder;
 }
 
-vector<item> order::createMenu() //Creates Menu to Read
+vector<item> order::loadMenu() //Creates Menu to Read
 {
     vector<item> returnMenu;
     ifstream fin;
@@ -118,14 +120,16 @@ vector<item> order::createMenu() //Creates Menu to Read
       tempItem.price = stod(price);
       tempItem.avgPrepTime = stoi(avgPrepTime);
       tempItem.maxAmt = stoi(maxAmt);
+      
+      returnMenu.push_back(tempItem);
     }
   
   return returnMenu;
 }
 
-void order::readMenu() //Reads Menu
+void order::showMenu() //Reads Menu
 {
-  vector<item> menu = createMenu();
+  vector<item> menu = loadMenu();
   
   for(auto& it: menu)
   {
@@ -138,7 +142,7 @@ void order::readMenu() //Reads Menu
 void order::addItem(int idNumber, int amount) //Adds Item to Order
 {
     item tempItem;
-    vector<item> menu = createMenu();
+    vector<item> menu = loadMenu();
     for(auto& it: menu)
     {
       if(it.idNumber == idNumber)
@@ -202,7 +206,6 @@ void order::pay(double tax)
 {
   double total = 0;
   map<item, int>::iterator it;
-  vector<item> menu = createMenu();
   for(it = items.begin(); it != items.end(); it++)
   {
     for(int i = 0; i < it->second; it++)
