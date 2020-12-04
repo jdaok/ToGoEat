@@ -11,7 +11,6 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
-#include <list>
 #include <map>
 #include <vector>
 #include <fstream>
@@ -31,7 +30,7 @@ struct item
 {
   string name;
   int idNumber;
-  int amount;
+  double price;
 };
 
 class order
@@ -39,8 +38,7 @@ class order
     int orderID;
     int status; //1 = Ordering, 2 = Paying, 3 = Cooking, 4 = Finished
     bool paid;
-    //list<item, int> items;
-    map<item, int> items;
+    map<item, int> items; //Int is for amount
     
 public:
     order(); //Default Constructor
@@ -51,14 +49,13 @@ public:
     int getStatus();
     string reportStatus();
     void getSummary();
-    
-    void pay();
+    void pay(double);
     void finishOrder();
 };
 
 order::order() //Default Constructor
 {
-  orderID = 0;
+  orderID = -1;
   status = 1;
   paid = false;
 }
@@ -125,7 +122,8 @@ void order::addItem(int idNumber, int amount) //Adds Item to Order
       {
         tempItem.name = it.name;
         tempItem.idNumber = it.idNumber;
-        tempItem.amount = amount;
+        tempItem.price = it.price;
+        //tempItem.amount = amount;
         items.insert(pair<item, int>(tempItem, amount));
         break;
       }
@@ -135,18 +133,17 @@ void order::addItem(int idNumber, int amount) //Adds Item to Order
 void order::getSummary() //Returns Summary
 {
   cout << endl;
-  cout << "Order #" << orderID << " - " << endl;
+  cout << "Order #" << orderID << ": " << endl;
+  string status = reportStatus();
+  cout << "Status: " << status << endl;
+  cout << "Items: " << endl;
   
   map<item, int>::iterator it;
   for(it = items.begin(); it != items.end(); it++)
   {
-    cout << it->first.idNumber << " " << it->first.name << " (" << it->first.amount << ")" << endl;
+    cout << it->first.idNumber << " " << it->first.name << " (" << it->second << ")" << endl;
   }
-  
-  /*for(auto& it: this->items)
-    {
-      
-    }*/
+  cout << endl;
 }
 
 string order::reportStatus() //Returns Order Status
@@ -173,9 +170,26 @@ string order::reportStatus() //Returns Order Status
   return returnValue;
 }
 
+void order::pay(double tax)
+{
+  double total = 0;
+  map<item, int>::iterator it;
+  vector<menuItem> menu = createMenu();
+  for(it = items.begin(); it != items.end(); it++)
+  {
+    for(int i = 0; i < it->second; it++)
+    {
+      total += it->first.price;
+    }
+  }
+  
+  total += (tax * total);
+  paid = true;
+}
+
 void order::finishOrder()
 {
-    
+  
 }
 
 #endif /* Order_h */
