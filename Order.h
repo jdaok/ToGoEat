@@ -15,28 +15,29 @@
 #include <fstream>
 #include <cstring>
 
+#include "common.h"
 #include "Restaurant.h"
 
 using namespace std;
 
-class order
+class Order
 {
 public:
     int orderID;
     int status; //1 = Ordering, 2 = Cooking, 3 = Finished
-    queue<item> items;
+    queue<MenuItem> items;
     double totalPayment;
 
-    order(); //Default Constructor
-    void createOrderItems(vector<item> menu); //Creates Random Orders
+    Order(); //Default Constructor
+    void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
     int generateID();
 
     //Menu Functions
-    vector<item> loadMenu(); //Loads Menu
+    vector<MenuItem> loadMenu(); //Loads Menu
     void showMenu();
 
     //Item Functions
-    void addItem(int, int, vector<item> menu);
+    void addItem(int, int, vector<MenuItem> menu);
 
     //Status Functions
     void setStatus(int);
@@ -49,7 +50,7 @@ public:
 
 };
 
-order::order() //Default Constructor
+Order::Order() //Default Constructor
 {
 
     orderID = generateID();
@@ -58,10 +59,10 @@ order::order() //Default Constructor
 }
 
 
-void order::printOrder()
+void Order::printOrder()
 {
 
-    queue<item> itemsCopy = items;
+    queue<MenuItem> itemsCopy = items;
     while(itemsCopy.empty() == false)
     {
         cout<< itemsCopy.front().name<<endl;
@@ -71,14 +72,14 @@ void order::printOrder()
     cout<<"----- Total $: " << totalPayment <<endl;
 }
 
-int order::generateID() //Generates Random ID
+int Order::generateID() //Generates Random ID
 {
     srand((unsigned)time(NULL));
     int ID = rand() % 899999 + 100000;
     return ID;
 }
 
-void order::createOrderItems(vector<item> menu) // add items to order items randomly
+void Order::createOrderItems(vector<MenuItem> menu) // add items to order items randomly
 {
     srand((unsigned)time(NULL));
 
@@ -211,12 +212,12 @@ void order::getSummary() //Returns Summary
     cout << endl;
 }
 */
-void order::setStatus(int setValue) //Set Value of Status
+void Order::setStatus(int setValue) //Set Value of Status
 {
     status = setValue;
 }
 
-string order::reportStatus() //Returns Order Status
+string Order::reportStatus() //Returns Order Status
 {
     string returnValue = "";
     switch(this->status)
@@ -237,7 +238,7 @@ string order::reportStatus() //Returns Order Status
     return returnValue;
 }
 
-void order::finishOrder()
+void Order::finishOrder()
 {
 
 }

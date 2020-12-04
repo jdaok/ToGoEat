@@ -4,21 +4,14 @@
 #include <string>
 #include <cstdlib>
 #include <map>
+
 using namespace std;
 
-struct item
-{
-    string name;
-    int type;        // 0 = food. 1 = drink. food takes longer
-    double price;        // ex. 1.50$
-    int avgPrepTime;  // ex. 15 minutes
-    bool finished = false;
-};
+#include "common.h"
 
-vector<item> menu;
 
-vector<item> foodChefs;
-vector<item> drinkChefs;
+vector<MenuItem> foodChefs;
+vector<MenuItem> drinkChefs;
 
 struct Restaurant
 {

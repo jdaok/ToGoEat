@@ -1,302 +1,411 @@
-//
-//  ToGoEat.cpp
-//  
-//
-//  Created by Max Raffield on 11/29/20.
-//
+//Programmer:Jiefeng Yang
+//Programmer's ID:1791121
 
-#include <iostream>
-#include <string>
 #include <fstream>
-#include <cstdlib>
-#include <map>
+#include <iostream>
+#include <iomanip>
 #include <string>
-#include <cstring>
-#include "DynamicArray.h"
-
 using namespace std;
 
-//Function Templates
-int askMode();
-bool getPassword();
-int askManager();
+#include <cmath>
+#include <cstdlib>
+#include <ctime> // for clock( ), clock_t, time, and CLOCKS_PER_SEC
 
+#include "PriorityQueue.h"
+#include "DynamicArray.h"
+#include "Queue.h"
 
-struct item
+#include "Order.h"
+
+struct simulationConfig
 {
-    double price;        // ex. 1.50$
-    int avgPrepTime;  // ex. 15 minutes
-    int maxAmt;          // maximum amount of this item per order: ex. you can only order 5 pizza's at a time
+    int chefNumber; //the number of chefs
+    int timeAtNewArrStop; //the clock time at which new arrivals stop, in minutes(> 0, whole number)
+
+    //TODO maybe don't need those
+    double aveCustArrivalRate; //the average arrival rate of customers, per minute (greater than 0.0, floating point)
+    int maxLenWaitQue; //the maximum length of the wait queue(1 or more, whole number)
+    int minSerTimeInterval; //the minimum service time interval, in minutes(1 or more, whole number)
+    int maxSerTimeInterval; //the maximum service time interval, in minutes(>= minimum service time interval, whole number)
+    
 };
 
+//ToDo will change to Order
 
-struct Restaurant
+
+struct ServiceEvent
 {
-    string name;
-    map<string, item> items; // menu of items. key = name string, value = struct item
-    double dailyIncome;
-    double netIncome;
-    int ordersCompleted;
-    int deliveriesCompleted;
+    int serverNum;
+    int serviceEndTime;
 };
 
+struct ServerInfo
+{
+    Order order;  //TODO Order order
+    bool status;
+};
+
+//for comparing ServiceEvent in PriorityQueue template
+bool operator<(const ServiceEvent& a, const ServiceEvent& b)
+{
+    //swith to lo-to-hi priority 
+    return b.serviceEndTime < a.serviceEndTime;
+}
+
+const int W1 = 23;   //cout width. W1 for title 
+const string CONFIG_FILE_NAME = "simulation.txt";
+
+//void outputProgrammerInfo();
+bool loadSimulationConfig(string fileName, simulationConfig& config);
+void outputTitle(simulationConfig config);
+int getRandomNumberOfArrivals(double);
+int getServiceTime(const int, const int);
+
+bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulationConfig& config,
+    const DynamicArray<ServerInfo>& servers);
+void outputServiceEndingTime(const PriorityQueue<ServiceEvent>& eventQueue);
+void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfig& config,
+    const DynamicArray<ServerInfo>& servers);
+
+
+void pauseForUserEnter();
 
 
 int main()
 {
-    //Modes
-    int mode = 0; //1 - Customer, 2 - Manager
-    mode = askMode();
-    cin.ignore();
+    //for rand() only call once. using static_cast to fix the warning that data type conversion may lose data. 
+    srand(static_cast<unsigned int>(time(0))); rand();
+    //outputProgrammerInfo();
+
+    simulationConfig config;  //simulation config data
+    if (!loadSimulationConfig(CONFIG_FILE_NAME, config))
+    {
+        cout << "Load the config file Error:" << CONFIG_FILE_NAME <<
+            ". Please check and rerun the program" << endl;
+        return 1;
+    }
+    outputTitle(config);
+
+    Queue<Order> waitLine;   //TODO Queue<Order> waitLine
+    PriorityQueue<ServiceEvent> eventQueue;
+    DynamicArray<ServerInfo> servers;
+
+
+
+    for (int time = 0;; time++)
+    {
+        //handle all services scheduled
+        while (!eventQueue.empty() && eventQueue.top().serviceEndTime == time)
+        {
+            servers[eventQueue.top().serverNum].status = false;
+            eventQueue.pop();
+        }
+        //handle new arrivals
+        //pause for the user to press ENTER
+        pauseForUserEnter();
+        
+        //Todo notice user to chose the food and make order
+        //change the random order to user type order
+        Order tempOrder;
+        cout << endl << "----- ORDER #" << tempOrder.orderID << endl; // print order when new one created
+        tempOrder.printOrder();
+        waitLine.push(tempOrder);
+        /*if (time < config.timeAtNewArrStop)
+        {
+            int arrivalNum = getRandomNumberOfArrivals(config.aveCustArrivalRate);
+            for (int i = 0; i < arrivalNum; i++)
+            {
+                if (waitLine.size() < config.maxLenWaitQue)
+                {
+                    Order temp;
+                    temp.arrivalTime = time;
+                    temp.id = genrateOrderID();
+                    waitLine.push(temp);
+                }
+            }
+        }*/
+
+        // for idle servers, move Order from wait queue and begin service for each server
+        for (int i = 0; i < config.chefNumber; i++)
+        {
+            if (!servers[i].status && !waitLine.empty())
+            {
+                //TODO here is the order
+                servers[i].order = waitLine.front();  
+                servers[i].status = true;
+
+                //TODO  order add getServiceTime() fuc
+                //int serviceTime = servers[i].order.getServiceTime();
+
+                waitLine.pop();
+
+                ServiceEvent temp;
+                //getServiceTime become the order prepare time 
+                //TODO  = time + serviceTime;
+                temp.serviceEndTime = time + getServiceTime(config.minSerTimeInterval,
+                    config.maxSerTimeInterval);
+                temp.serverNum = i;
+                eventQueue.push(temp);
+            }
+        }
+
+        outputSummary(time, waitLine, config, servers);
+        //TODO maybe don't need this
+        outputServiceEndingTime(eventQueue);
+
+        if (shouldEndSimulation(time, waitLine, config, servers))
+            break;
+
+    }
+
+    //TODO output the total numer of the order and total amount of money the restaurant made.
+
+    cout << endl << "Done!" << endl;
+
+    return 0;
+}
+
+//*****************
+//Function name: getRandomNumberOfArrivals
+//Purpose: get Random Number Of Arrivals
+//averageArrivalRate: average Arrival Rate
+//Returns: Random Number Of Arrivals
+//Return type: int
+//*****************
+int getRandomNumberOfArrivals(double averageArrivalRate)
+{
+    int arrivals = 0;
+    double probOfnArrivals = exp(-averageArrivalRate);
+    for (double randomValue = (double)rand() / RAND_MAX;
+        (randomValue -= probOfnArrivals) > 0.0;
+        probOfnArrivals *= averageArrivalRate / static_cast<double>(++arrivals));
+    return arrivals;
+}
+
+
+
+int getServiceTime(const int min, const int max)
+{
+    return min + (rand() % max);
+}
+
+
+/*void outputProgrammerInfo()
+{
+    cout << "Programmer: Jiefeng Yang\n";
+    cout << "Programmer's ID: 1791121\n";
+    cout << "File: " << __FILE__ << endl;
     cout << endl;
+}*/
 
-    string input;
+//*****************
+//Function name: loadSimulationConfig
+//Purpose: process Simulation Config file 
+//fileName: Config file name
+//config: config data(input & output)
+//Returns: True-succed False-fail
+//Return type: bool
+//*****************
+bool loadSimulationConfig(string fileName, simulationConfig& config)
+{
+    bool ret = true;
+
     ifstream fin;
-    char* token;
-    char buf[1000];
-    const char* const tab = "\t";
-
-    //Manager Side
-
-    if(mode == 2)
+    fin.open(fileName);
+    if (fin.good())
     {
-        //Check Password
-        cout << "You are attempting to use the Manager-side of the program." << endl<< endl;
-
-        // Create restuarant
-
-        Restaurant restaurant;
-
-        cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
-        cin >> input;
-        restaurant.name = input;
-        cout<<endl<<"Great! Loading menu for "<<restaurant.name<<"... "<<endl;
-
-        // Load menu.txt
-
-        fin.open("menu.txt");
-        if (!fin.good())
-            cout << "I/O error. File can't find!\n";
-
-        while (fin.good())
+        string line;
+        getline(fin, line);
+        config.chefNumber = atoi(line.c_str());
+        if (config.chefNumber < 1)
         {
-            // read the line
-
-            string line;
-            getline(fin, line);
-            strcpy(buf, line.c_str());
-
-            if (buf[0] == 0) continue; // skip blank lines
-
-            //parse the line
-            const string name(token = strtok(buf, tab));
-            if (name.find('-') != string::npos) continue; // skip first line which has a dash in it
-
-            const string price((token = strtok(0, tab)) ? token : "");
-            const string avgPrepTime((token = strtok(0, tab)) ? token : "");
-            const string maxAmt((token = strtok(0, tab)) ? token : "");
-
-
-            // add item to restaurant menu map
-            item tempItem;
-            tempItem.price = stod(price);
-            tempItem.avgPrepTime = stoi(avgPrepTime);
-            tempItem.maxAmt = stoi(maxAmt);
-            restaurant.items.insert(pair<string, item>(name, tempItem));
+            cout << "Config Error:the number of servers need to be 1 or more." << endl;
+            ret = false;
         }
 
-        cout<<"Loaded "<<restaurant.items.size()<<" items onto the menu."<<endl;
-        fin.close();
-      
-      //Manager Options
-      //-1 = Quit, 1 = Create Item, 2 = Remove Item
-      int managerMode = 0;
-      bool continueManager = true;
-      int managerInput = 0;
-      
-      while(continueManager)
-      {
-        managerInput = askManager();
-        
-        switch(managerInput)
+        getline(fin, line);
+        config.aveCustArrivalRate = atof(line.c_str());
+        if (config.aveCustArrivalRate < 0.0)
         {
-          case -1:
-            continueManager = false;
-            break;
-          case 1:
-            managerMode = 1;
-          case 2:
-            managerMode = 2;
-            default:
-            cout << "Invalid choice." << endl;
+            cout << "Config Error:the average arrival rate of Orders/per minute need to greater than 0.0."
+                << endl;
+            ret = false;
         }
-        
-        if(managerMode == 1) //Adding Menu Item
-        {
-          item newItem;
-          string newName = "", newPrice = "", newTime = "", newAmt = "";
-          cout << endl;
-          cout << "What is the item's name?" << endl;
-          getline(cin, newName);
-          cout << "What is the item's price?" << endl;
-          getline(cin, newPrice);
-          cout << "What is the average preparation time?" << endl;
-          getline(cin, newTime);
-          cout << "What is the maximum amount?" << endl;
-          getline(cin, newAmt);
-          
-          newItem.price = atof(newPrice.c_str());
-          newItem.avgPrepTime = atoi(newTime.c_str());
-          newItem.maxAmt = atoi(newAmt.c_str());
-          restaurant.items.insert(pair<string, item>(newName, newItem));
-        }
-        
-        else if(managerMode == 2) //Removing Menu Item
-        {
-          string itemName = "";
-          cout << endl;
-          cout << "What is the name of the item to be removed?" << endl;
-          getline(cin, itemName);
-          if(restaurant.items.find(itemName) != restaurant.items.end()) //Item Found
-          {
-            restaurant.items.erase(restaurant.items.find(itemName));
-          }
-          else //Not Found
-          {
-            cout << "Item was not found. " << endl;
-          }
-        }
-      }
 
-        /*
+        getline(fin, line);
+        config.maxLenWaitQue = atoi(line.c_str());
+        if (config.maxLenWaitQue < 1)
+        {
+            cout << "Config Error:the maximum length of the wait queue need to be 1 or more." << endl;
+            ret = false;
+        }
 
-        bool correctPassword = getPassword();
-            if(correctPassword == false)
+        getline(fin, line);
+        config.minSerTimeInterval = atoi(line.c_str());
+        if (config.minSerTimeInterval < 1)
+        {
+            cout << "Config Error:the minimum service time interval in minutes need to be 1 or more, whole number." << endl;
+            ret = false;
+        }
+
+        getline(fin, line);
+        config.maxSerTimeInterval = atoi(line.c_str());
+        if (config.maxSerTimeInterval < config.minSerTimeInterval)
+        {
+            cout << "Config Error:the maximum service time interval need to >= minimum service time interval" << endl;
+            ret = false;
+        }
+
+        getline(fin, line);
+        config.timeAtNewArrStop = atoi(line.c_str());
+        if (config.timeAtNewArrStop < 0)
+        {
+            cout << "Config Error:the clock time at which new arrivals stop, in minutes needs to > 0" << endl;
+            ret = false;
+        }
+
+        fin.close(); // done with the file
+        return ret;
+    }
+    else
+    {
+        cout << "Error, can not read the config file:" << fileName << endl;
+        return false;
+    }
+}
+
+
+//*****************
+//Function name: outputTitle
+//Purpose: output Title
+//config: config data
+//Returns: None
+//Return type: void
+//*****************
+void outputTitle(simulationConfig config)
+{
+    cout << "********Welcome to the ToGoEat********" << endl;
+    cout << setw(W1) << left << "number of chef:" << config.chefNumber << endl;
+    cout << setw(W1) << left << "Order arrival rate:" << config.aveCustArrivalRate
+        << right << setw(16) << "per minute, for" << setw(3) << config.timeAtNewArrStop << setw(8) << "minutes" << endl;
+    cout << setw(W1) << left << "maximum queue length:" << config.maxLenWaitQue << endl;
+    cout << setw(W1) << left << "minimum service time:" << config.minSerTimeInterval << right << setw(8)
+        << "minutes" << endl;
+    cout << setw(W1) << left << "maximum service time:" << config.maxSerTimeInterval << right << setw(8)
+        << "minutes" << endl << endl;
+}
+
+
+
+//TODO don't need this. Just get the cusomter name from the order
+//*****************
+//Function name: genrateOrderID
+//Purpose: genrate Order ID
+//Returns: Order ID
+//Return type: char
+//*****************
+char genrateOrderID()
+{
+    static int number = 0;
+    int index = number % 26; //reuse the 26 letter A-Z
+
+    char ID = 'A' + index;
+    number++;
+
+    return ID;
+}
+
+
+
+bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulationConfig& config,
+    const DynamicArray<ServerInfo>& servers)
+{
+    bool end = false;
+    if (waitLine.empty() && time >= config.timeAtNewArrStop)
+    {
+        for (int i = 0; i < config.chefNumber; i++)
+        {
+            if (servers[i].status)
+                break;
+            if (i == config.chefNumber - 1)
+                end = true;
+        }
+    }
+
+    return end;
+}
+
+void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfig& config,
+    const DynamicArray<ServerInfo>& servers)
+{
+    cout << left << setw(6) << "Time:" << time << right << endl;
+    string title1 = "chef  ", title2 = "now serving", title3 = "wait queue";
+    int title1Len = title1.length(), title2Len = title2.length(), title3Len = title3.length();
+    int row2Wide = title2Len + 2, row3Wide = title3Len + 2;
+
+    string splitSign(title1Len + title2Len + title3Len + 2, '-');
+    cout << splitSign << endl;
+
+    cout << title1 << setw(row2Wide) << title2 << setw(row3Wide) << title3 << endl;
+    cout << string(title1Len, '-') << setw(row2Wide) << string(title2Len, '-')
+        << setw(row3Wide) << string(title3Len, '-') << endl;
+
+    for (int i = 0; i < config.chefNumber; i++)
+    {
+        cout << setw(3) << i;
+        if (servers[i].status)
+        {
+            cout.width(10);
+            cout << servers[i].order.orderID;
+            if (i == 0 && !waitLine.empty())
             {
-              cout << endl;
-              cout << "Switching over to Customer-side." << endl;
-              mode = 1;
+                cout << setw(9);
+                Queue<Order> temp = waitLine;
+                while (temp.size() != 0)
+                {
+                    cout << temp.front().orderID;
+                    temp.pop();
+                }
             }
-
-            if(correctPassword == true)
-            {
-              cout << endl;
-              cout << "Successfully using Manager-side of the program." << endl;
-            }
-
-            if(mode == 2) //Re-checking for Manager-side
-            {
-
-            */
-
-    }
-
-    //Customer Side
-    if(mode == 1)
-    {
-      cout << "You are now using the Customer-side of the program." << endl;
-        while (true)
-        {
-          cout << endl;
-          cout << "What would you like to order?" << endl;
-          
-          //Open Menu and Read
-          
-          //Place Order
-          
         }
+
+        cout << endl << endl;
     }
 
 }
 
-int askMode() //Ask for Customer or Manager
+void outputServiceEndingTime(const PriorityQueue<ServiceEvent>& eventQueue)
 {
-    string buf = "";
-    int buffer = 0, returnValue = 0;
-    bool valid = false;
-
-    while(valid == false)
+    cout << "chef   | time for end-of-service" << endl;
+    cout << "------ + -----------------------" << endl;
+    for (PriorityQueue<ServiceEvent> temp = eventQueue; !temp.empty(); temp.pop())
     {
-        cout << endl;
-        cout << "Customer or manager? [1 = Customer, 2 = Manager]" << endl;
-        cin >> buf;
-        buffer = atoi(buf.c_str());
-
-        switch(buffer)
-        {
-        case 1:
-            returnValue = 1;
-            valid = true;
-            break;
-        case 2:
-            returnValue = 2;
-            valid = true;
-            break;
-        default:
-            cout << endl;
-            cout << "Invalid input, try again." << endl;
-        }
+        cout.width(4);
+        cout << temp.top().serverNum << setw(4) << "|";
+        cout.width(6);
+        cout << temp.top().serviceEndTime << endl;
     }
 
-    return returnValue;
+    if (!eventQueue.empty())
+        cout << endl << "Next end-of-service event in "
+        << eventQueue.top().serviceEndTime << " minutes" << endl << endl;
+    else
+        cout << endl << "No scheduled end-of-service events at this time" << endl << endl;
 }
 
-bool getPassword() //Password-checker
+
+
+//*****************
+//Function name: pauseForUserEnter
+//Purpose: pause the program and wait for user enter
+//Returns: None
+//Return type: void
+//*****************
+void pauseForUserEnter()
 {
-    bool returnValue = false;
-    bool keepPlaying = true;
-    string userPass = "", realPass = "";
-    ifstream fin;
-
-    fin.open("password.txt");
-    if(!fin.good())
-        cout << "I/O error. Can't find file!\n";
-
-    while(fin.good())
-    {
-        getline(fin, realPass);
-    }
-
-    while(keepPlaying == true)
-    {
-        cout << endl;
-        cout << "Enter the password: [Enter XXX to switch to Customer]" << endl;
-        getline(cin, userPass);
-
-        //Change to Customer-side
-        if(userPass == "XXX")
-        {
-            keepPlaying = false;
-            break;
-        }
-
-        //Correct Password
-        if(userPass == realPass)
-        {
-            returnValue = true;
-            keepPlaying = false;
-            break;
-        }
-
-        //Incorrect Password
-        if(userPass != realPass)
-        {
-            cout << endl;
-            cout << "Incorrect Password, try again." << endl;
-        }
-    }
-    return returnValue;
+    cout << "Press ENTER to make a order..." << endl;
+    while (getchar() != '\n');
+    cout << endl;
 }
 
-int askManager()
-{
-  int returnValue = 0;
-  cout << endl;
-  cout << "Select an option: " << endl;
-  cout << "[-1 = Quit]" << endl;
-  cout << "[1 = Create a Menu Item]" << endl;
-  cout << "[2 = Remove a Menu Item]" << endl;
-  cin >> returnValue;
-  
-  return returnValue;
-}
+
