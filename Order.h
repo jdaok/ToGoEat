@@ -17,20 +17,13 @@
 
 using namespace std;
 
-struct menuItem
+struct item
 {
     string name;
     int idNumber;
     double price;
     int avgPrepTime;
     int maxAmt;
-};
-
-struct item
-{
-  string name;
-  int idNumber;
-  double price;
 };
 
 class order
@@ -42,26 +35,57 @@ class order
     
 public:
     order(); //Default Constructor
-    vector<menuItem> createMenu(); //Show Menu
+    order createOrder(); //Creates Random Orders
+    int generateID();
+  
+  //Menu Functions
+    vector<item> createMenu(); //Show Menu
     void readMenu();
+  
+  //Item Functions
     void addItem(int, int);
+  
+  //Status Functions
     void setStatus(int);
     string reportStatus();
     void getSummary();
+  
+  //Paying Functions
     void pay(double);
     void finishOrder();
 };
 
 order::order() //Default Constructor
 {
-  orderID = -1;
+  orderID = generateID();
   status = 1;
   paid = false;
 }
 
-vector<menuItem> order::createMenu() //Creates Menu to Read
+int order::generateID() //Generates Random ID
 {
-    vector<menuItem> returnMenu;
+  srand((unsigned)time(NULL));
+  int ID = rand() % 899999 + 100000;
+  
+  return ID;
+}
+
+order order::createOrder()
+{
+  srand((unsigned)time(NULL));
+  order newOrder;
+  vector<item> menu = createMenu();
+  for(auto& it: menu)
+  {
+    int amount = rand() % it.maxAmt;
+    newOrder.addItem(it.idNumber, amount);
+  }
+  return newOrder;
+}
+
+vector<item> order::createMenu() //Creates Menu to Read
+{
+    vector<item> returnMenu;
     ifstream fin;
     fin.open("menu.txt");
   
@@ -87,7 +111,7 @@ vector<menuItem> order::createMenu() //Creates Menu to Read
       const string avgPrepTime((token = strtok(0, tab)) ? token : "");
       const string maxAmt((token = strtok(0, tab)) ? token : "");
 
-      menuItem tempItem;
+      item tempItem;
       tempItem.name = name;
       tempItem.idNumber = itemID;
       itemID++;
@@ -101,7 +125,7 @@ vector<menuItem> order::createMenu() //Creates Menu to Read
 
 void order::readMenu() //Reads Menu
 {
-  vector<menuItem> menu = createMenu();
+  vector<item> menu = createMenu();
   
   for(auto& it: menu)
   {
@@ -114,7 +138,7 @@ void order::readMenu() //Reads Menu
 void order::addItem(int idNumber, int amount) //Adds Item to Order
 {
     item tempItem;
-    vector<menuItem> menu = createMenu();
+    vector<item> menu = createMenu();
     for(auto& it: menu)
     {
       if(it.idNumber == idNumber)
@@ -178,7 +202,7 @@ void order::pay(double tax)
 {
   double total = 0;
   map<item, int>::iterator it;
-  vector<menuItem> menu = createMenu();
+  vector<item> menu = createMenu();
   for(it = items.begin(); it != items.end(); it++)
   {
     for(int i = 0; i < it->second; it++)
