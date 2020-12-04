@@ -132,7 +132,7 @@ void order::addItem(int idNumber, int amount) //Adds Item to Order
 void order::getSummary() //Returns Summary
 {
   cout << endl;
-  cout << "Order #" << idNumber << " - " << endl;
+  cout << "Order #" << orderID << " - " << endl;
   for(auto& it: this->items)
     {
       cout << it.idNumber << " " << it.name << " (" << it.amount << ")" << endl;
