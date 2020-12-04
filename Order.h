@@ -32,12 +32,12 @@ class order
     int orderID;
     int status; //1 = Ordering, 2 = Paying, 3 = Cooking, 4 = Finished
     bool paid;
-    map<item, int> items; //Int is for amount
-    //queue<item> items;
+    //map<item, int> items; //Int is for amount
+    queue<item> items;
     
 public:
     order(); //Default Constructor
-    order createOrder(); //Creates Random Orders
+    order createOrder(vector<item>); //Creates Random Orders
     int generateID();
   
   //Menu Functions
@@ -45,7 +45,7 @@ public:
     void showMenu();
   
   //Item Functions
-    void addItem(int, int);
+    void addItem(int, int, vector<item> menu);
   
   //Status Functions
     void setStatus(int);
@@ -72,15 +72,15 @@ int order::generateID() //Generates Random ID
   return ID;
 }
 
-order order::createOrder()
+order order::createOrder(vector<item> menu)
 {
   srand((unsigned)time(NULL));
   order newOrder;
-  vector<item> menu = loadMenu();
-  for(auto& it: menu)
+  //vector<item> menu = loadMenu();
+  for(auto& it: menu) //For Each Menu Item, Generate From 0 to MaxAmt
   {
     int amount = rand() % it.maxAmt;
-    newOrder.addItem(it.idNumber, amount);
+    newOrder.addItem(it.idNumber, amount, menu);
   }
   return newOrder;
 }
@@ -139,10 +139,10 @@ void order::showMenu() //Reads Menu
   }
 }
 
-void order::addItem(int idNumber, int amount) //Adds Item to Order
+void order::addItem(int idNumber, int amount, vector<item> menu) //Adds Item to Order
 {
     item tempItem;
-    vector<item> menu = loadMenu();
+    //vector<item> menu = loadMenu();
     for(auto& it: menu)
     {
       if(it.idNumber == idNumber)
@@ -151,7 +151,11 @@ void order::addItem(int idNumber, int amount) //Adds Item to Order
         tempItem.idNumber = it.idNumber;
         tempItem.price = it.price;
         //tempItem.amount = amount;
-        items.insert(pair<item, int>(tempItem, amount));
+        //items.insert(pair<item, int>(tempItem, amount));
+        for(int i = 0; i < amount; i++)
+        {
+          items.push(tempItem);
+        }
         break;
       }
     }
@@ -165,10 +169,18 @@ void order::getSummary() //Returns Summary
   cout << "Status: " << status << endl;
   cout << "Items: " << endl;
   
-  map<item, int>::iterator it;
+  /*map<item, int>::iterator it;
   for(it = items.begin(); it != items.end(); it++)
   {
     cout << it->first.idNumber << " " << it->first.name << " (" << it->second << ")" << endl;
+  }*/
+  
+  queue<item> copyQueue;
+  copyQueue = items;
+  for(int i = 0; i < items.size(); i++)
+  {
+    cout << copyQueue.front().idNumber << " " << copyQueue.front().name << endl;
+    copyQueue.pop();
   }
   cout << endl;
 }
@@ -204,14 +216,23 @@ string order::reportStatus() //Returns Order Status
 
 void order::pay(double tax)
 {
+  setStatus(2);
   double total = 0;
-  map<item, int>::iterator it;
+  /*map<item, int>::iterator it;
   for(it = items.begin(); it != items.end(); it++)
   {
     for(int i = 0; i < it->second; it++)
     {
       total += it->first.price;
     }
+  }*/
+  
+  queue<item> copyQueue;
+  copyQueue = items;
+  for(int i = 0; i < items.size(); i++)
+  {
+    total += copyQueue.front().price;
+    copyQueue.pop();
   }
   
   total += (tax * total);
@@ -220,7 +241,7 @@ void order::pay(double tax)
 
 void order::finishOrder()
 {
-  
+  setStatus(4);
 }
 
 #endif /* Order_h */
