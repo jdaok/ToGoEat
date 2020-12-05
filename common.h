@@ -1,5 +1,6 @@
 #ifndef common_h
 #define common_h
+
 struct MenuItem
 {
     string name;
@@ -8,6 +9,20 @@ struct MenuItem
     double price;        // ex. 1.50$
     int avgPrepTime;  // ex. 15 minutes
     bool finished = false;
+
+    MenuItem& operator=(const MenuItem& original) //assignment operator
+    {
+        if (this != &original) // of it's not a self copy...
+        {
+            name = original.name;
+            idNumber = original.idNumber;
+            price = original.price;
+            avgPrepTime = original.avgPrepTime;
+            finished = original.finished;
+        }
+
+        return *this; // return a self reference
+    };
 };
 
 vector<MenuItem> MENU;
@@ -54,24 +69,23 @@ bool loadMenu(vector<MenuItem>& menu)
   return true;
 }
 
-void showMenu(const vector<MenuItem> menu)
+void showMenu(const vector<MenuItem> &menu)
 {
     const int width2 = 12;
 
-    cout << right<<setw(width2) << "ID# " <<
-         setw(width2) << "name" <<
-         setw(width2) << "price" << endl;
+    cout << right << setw(width2) << "ID# " <<
+        setw(width2) << "name" <<
+        setw(width2) << "price" << endl;
 
-    cout << right<<setw(width2) << "----" <<
-         setw(width2) << "----" <<
-         setw(width2) << "-----" << endl;
+    cout << right << setw(width2) << "----" <<
+        setw(width2) << "----" <<
+        setw(width2) << "-----" << endl;
 
     for (int i = 0; i < menu.size(); i++)
     {
-        cout << right<<setw(width2) << menu[i].idNumber <<
-             setw(width2) << menu[i].name <<
-             setw(width2) << menu[i].price << endl;
-
+        cout << right << setw(width2) << menu[i].idNumber <<
+            setw(width2) << menu[i].name <<
+            setw(width2) << menu[i].price << endl;
     }
 }
 

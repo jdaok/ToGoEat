@@ -15,8 +15,7 @@ using namespace std;
 
 void managerSetup();
 int manager();
-void loadMenu();
-void showMenu(vector<item> menu);
+
 
 void managerSetup()
 {
@@ -149,83 +148,6 @@ int manager()
         }
     }
 }
-
-void loadMenu()
-{
-    string input;
-    ifstream fin;
-    char* token;
-    char buf[1000];
-    const char* const tab = "\t";
-
-    // Create restuarant
-
-
-    // Load menu.txt
-
-    fin.open("menu.txt");
-    if (!fin.good())
-        cout << "I/O error. File can't find!\n";
-
-    while (fin.good())
-    {
-
-        // read the line
-        string line;
-        getline(fin, line);
-        strcpy(buf, line.c_str());
-
-        if (buf[0] == 0) continue; // skip blank lines
-
-        //parse the line
-        const string ID(token = strtok(buf, tab));
-
-
-        if (ID.find('-') != string::npos) continue; // skip first line which has a dash in it
-
-        const string name((token = strtok(0, tab)) ? token : "");
-        const string price((token = strtok(0, tab)) ? token : "");
-        const string avgPrepTime((token = strtok(0, tab)) ? token : "");
-
-        // add item to restaurant menu map
-        item tempItem;
-        tempItem.idNumber = stoi(ID);
-
-        tempItem.name = name;
-        tempItem.price = stod(price);
-        tempItem.avgPrepTime = stoi(avgPrepTime);
-        menu.push_back(tempItem);
-    }
-
-    fin.close();
-    showMenu(menu);
-}
-
-
-void showMenu(const vector<item> menu)
-{
-    const int width2 = 12;
-
-    cout << right<<setw(width2) << "ID# " <<
-         setw(width2) << "name" <<
-         setw(width2) << "price" << endl;
-
-    cout << right<<setw(width2) << "----" <<
-         setw(width2) << "----" <<
-         setw(width2) << "-----" << endl;
-
-    for (int i = 0; i < menu.size(); i++)
-    {
-        cout << right<<setw(width2) << menu[i].idNumber <<
-             setw(width2) << menu[i].name <<
-             setw(width2) << menu[i].price << endl;
-    }
-}
-
-
-
-
-
 
 #endif
 
