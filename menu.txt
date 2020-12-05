@@ -1,6 +1,8 @@
--name	price	avgPrepTime	maxAmt
-Baconator	3.99	5	10
-Double Baconator	4.99	5	10
-Triple Baconator	5.99	5	10
-
-
+-ID	name	price	avgPrepTime
+0	Water	1.00	1
+1	Shake	1	4.99	
+3	Ramen	8.99	10
+4	Fries	4.99	5
+5	Cookie	1.99	1
+6	kesha	20	20	
+2	NewPizza	23	23	
