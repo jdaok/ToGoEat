@@ -6,9 +6,6 @@
 #ifndef Order_h
 #define Order_h
 
-#ifndef order_h
-#define order_h
-
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -112,18 +109,19 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     getline(cin, customerName);
     name = customerName;
    
-    int selection;
+    char selection;
     bool next = false;
     do
     {
-        cout << "Select an option [1 = Add Item, 2 = Clear Items, 3 = Print Order, -1 = Finish, -2 = Cancel]";
+      cout << "Select an option: " << endl;;
+      cout << "[1 = Add Item, 2 = Clear Items, 3 = Print Order, 4 = Finish, 5 = Cancel]" << endl;;
         cout << endl;
         cin >> selection;
         cin.ignore();
 
         switch (selection)
         {
-        case 1:
+        case '1':
             int itemID;
             cout << "Add a food with the ID" << endl;
             cin >> itemID;
@@ -133,35 +131,37 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
               addItem(itemID, menu);
             }
             break;
-        case 2:
+        case '2':
             cout << endl;
             cout << "Items Cleared." << endl;
             deleteItems();
             cout << endl;
             break;
-          case 3:
+        case '3':
             cout << endl;
             cout << "Order Details: " << endl;
             printOrder();
             break;
-        case -1:
+        case '4':
             //finish the order
             finishOrder();
             next = true;
             break;
-        case -2:
+        case '5':
             next = true;
             break;
         default:
-            cout << "Incorrect menu ID, please enter a correct one.";
-            selection = 0;
+            cout << "Incorrect menu ID, please enter a correct one." << endl;
+            cout << endl;
+            cin.ignore(1000, 10);
+            //selection = 0;
             break;
         }
        
     } while (!next);
 
     //customer finish the order
-    if (selection == -1)
+    if (selection == '4')
     {
         //now need to let customer pay the money
         //inside the pay function show the price and let
@@ -174,7 +174,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
         }
         return ret;
     }
-    else if (selection == -2)  //customer cancel the order
+    else if (selection == '5')  //customer cancel the order
     {
         //todo cancel the payment, need to delete the items
             //deleteItems();
