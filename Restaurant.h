@@ -26,7 +26,8 @@ struct Restaurant
     double netIncome;
     int ordersCompleted;
     int deliveriesCompleted;
-  
+    priority_queue <int, vector<int>, greater<int> > deletedIDs;
+
     //Functions
     void getSummary();
 };
