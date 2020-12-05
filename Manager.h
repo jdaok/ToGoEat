@@ -28,18 +28,17 @@ Manager::Manager() //Default Constructor
     cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
     getline(cin, input);
     cin.ignore(1000,10);
-    restaurant.name = input;
+   // restaurant.name = input;
 
     localMenu = MENU;
 
-    cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl;
+   // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl;
     showLocalMenu(localMenu);
 }
 
 void Manager::uploadMenuTXT() // upload vector menu to textfile
 {
-    ofstream outfile;
-    outfile.open("newMenu.txt");
+    ofstream outfile("menu.txt", ios_base::out|ios_base::trunc); // overwrite file
 
     char* token;
     char buf[1000];
@@ -53,8 +52,7 @@ void Manager::uploadMenuTXT() // upload vector menu to textfile
     }
 
     outfile.close();
-    remove("menu.txt");
-    rename("newMenu.txt","menu.txt");
+
 }
 
 int Manager::managerLoop()
