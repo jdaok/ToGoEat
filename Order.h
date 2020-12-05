@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "restaurant.h"
+#include "Manager.h"
 
 using namespace std;
 
@@ -75,6 +76,8 @@ void Order::printOrder()
         cout<< itemsCopy.front().name<<endl;
         itemsCopy.pop();
     }
+  
+    totalPayment = getTotal();
 
     cout<<"----- Total $: " << totalPayment <<endl;
 }
@@ -89,10 +92,9 @@ int Order::generateID() //Generates Random ID
 //todo let user type the order
 bool Order::makeOrder(const vector<MenuItem>& menu)
 {
-    //to do
+    //Create New Order
     Order newOrder;
   
-    cout << endl;
     cout << "Displaying Menu:";
     showMenu(menu);
   
@@ -107,7 +109,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     bool next = false;
     do
     {
-        cout << "Select an option [1 = Add Item, 2 = Clear Items, -1 = Finish, -2 = Cancel]";
+        cout << "Select an option [1 = Add Item, 2 = Clear Items, 3 = Print Order, -1 = Finish, -2 = Cancel]";
         cout << endl;
         cin >> selection;
         cin.ignore();
@@ -126,6 +128,9 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             break;
         case 2:
             newOrder.deleteItems();
+            break;
+          case 3:
+            printOrder();
             break;
         case -1:
             //finish the order
@@ -275,10 +280,13 @@ int Order::getServiceTime()
 
 double Order::getTotal()
 {
+  //totalPayment = 0;
   double tax = .10;
+  queue<MenuItem> copyQueue;
+  copyQueue = items;
   for(int i = 0; i < items.size(); i++)
   {
-    totalPayment += items.front().price;
+    totalPayment += copyQueue.front().price;
     items.pop();
   }
   totalPayment = totalPayment + (totalPayment * tax);
