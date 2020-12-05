@@ -16,13 +16,14 @@
 #include <cstring>
 
 #include "common.h"
-#include "Restaurant.h"
+#include "restaurant.h"
 
 using namespace std;
 
 class Order
 {
 public:
+    string name;
     int orderID;
     int status; //1 = Ordering, 2 = Cooking, 3 = Finished
     queue<MenuItem> items;
@@ -32,14 +33,15 @@ public:
     void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
     //todo let user type the order
     bool makeOrder(const vector<MenuItem> &menu);
-    //todo 
+    //todo
     bool pay();
 
     int generateID();
 
     //Item Functions
-    void addItem(int, int, vector<MenuItem> menu);
-
+    void addItem(int, vector<MenuItem> menu);
+    void deleteItems();
+    double getTotal();
 
     //Status Functions
     void setStatus(int);
@@ -86,65 +88,78 @@ int Order::generateID() //Generates Random ID
 bool Order::makeOrder(const vector<MenuItem>& menu)
 {
     //to do
-    int menuId;
-    
+    Order newOrder;
+  
+    cout << endl;
+    cout << "Displaying Menu:";
     showMenu(menu);
-    
+  
+    //Ask Name
+    string customerName;
+    getline(cin, customerName);
+    newOrder.name = customerName;
+  
+    int selection;
     bool next = false;
     do
     {
-        cout << "Please choose the food and input the menu id, type -1 to finish the order, type -2 to cancle the order";
-        cin >> menuId;
+        cout << "Select an option [1 = Add Item, 2 = Clear Items, -1 = Finish, -2 = Cancel]";
+        cin >> selection;
+        cin.ignore();
 
-        switch (menuId)
+        switch (selection)
         {
         case 1:
+            int itemID;
+            cout << "Add a food with the ID" << endl;
+            cin >> itemID;
+            cin.ignore(1000, 10);
+            if(itemID <= menu.size() && itemID > -1)
+            {
+              newOrder.addItem(itemID, menu);
+            }
         case 2:
-            //call additem
-            //addItem();
-            break;
+            newOrder.deleteItems();
         case -1:
             //finish the order
+            finishOrder();
             next = true;
             break;
         case -2:
             next = true;
             break;
         default:
-            cout << "wrong menu id, please enter";
+            cout << "Incorrect menu ID, please enter a correct one.";
 
         }
        
     } while (!next);
 
-    //cusomter finish the order
-    if (menuId == -1)
+    //customer finish the order
+    if (selection == -1)
     {
         //now need to let customer pay the money
-        //inside the pay function show the price and let 
+        //inside the pay function show the price and let
         bool ret = pay();
         if (!ret)
         {
-            //todo cancle the payment, need to delete the items
+            //todo cancel the payment, need to delete the items
             //deleteItems();
+          newOrder.deleteItems();
         }
         return ret;
     }
-    else if (menuId == -2)  //customer cancle the order
+    else if (selection == -2)  //customer cancel the order
     {
-        //todo cancle the payment, need to delete the items
+        //todo cancel the payment, need to delete the items
             //deleteItems();
+        newOrder.deleteItems();
         return false;
     }
     else
     {
         return false;
     }
-
-
- 
-
-
 }
 
 //todo
@@ -155,34 +170,33 @@ bool Order::pay()
     int input = 0;
     while (true)
     {
-        cout << "Please type 1 to pay, or -1 to cancle";
+      cout << "The total is: " << getTotal() << endl;
+        cout << "[1 = Pay, -1 = Cancel]" << endl;
         cin >> input;
         if (input == 1)
         {
-            cout << "Thank you " << endl;
+            cout << "Thank you!" << endl;
             printOrder();
             return true;
         }
         else if (input == -1)
         {
-            cout << "You cancle the order" << endl;
+            cout << "Order has been cancelled." << endl;
             return false;
         }
         else
         {
-            cout << "type the wrong number. Please reenter" << endl;
+            cout << "Incorrect number. Please Re-enter." << endl;
         }
+    }
 
-    } 
-    
-    
 }
 
 void Order::createOrderItems(vector<MenuItem> menu) // add items to order items randomly
 {
     srand((unsigned)time(NULL));
 
-    int maxAmount = rand() %5;
+    int maxAmount = rand() % 5;
     if (rand() % 2) maxAmount = 2;
     if (maxAmount == 0 || maxAmount == 1) maxAmount = 1;              // max amount of items in order. Most of the time, it's 1.
 
@@ -212,107 +226,45 @@ void Order::createOrderItems(vector<MenuItem> menu) // add items to order items 
 
 }
 
-
-/*
-vector<item> order::loadMenu() //Creates Menu to Read
+void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
 {
-    vector<item> returnMenu;
-    ifstream fin;
-    fin.open("menu.txt");
-
-    int itemID = 0;
-
-    char* token;
-    char buf[1000];
-    const char* const tab = "\t";
-
-    while(fin.good())
-    {
-        string line;
-        getline(fin, line);
-        strcpy(buf, line.c_str());
-
-        if (buf[0] == 0) continue; // skip blank lines
-
-        //parse the line
-        const string name(token = strtok(buf, tab));
-        if (name.find('-') != string::npos) continue; // skip first line which has a dash in it
-
-        const string price((token = strtok(0, tab)) ? token : "");
-        const string avgPrepTime((token = strtok(0, tab)) ? token : "");
-        const string maxAmt((token = strtok(0, tab)) ? token : "");
-
-        item tempItem;
-        tempItem.name = name;
-        tempItem.idNumber = itemID;
-        itemID++;
-        tempItem.price = stod(price);
-        tempItem.avgPrepTime = stoi(avgPrepTime);
-
-        returnMenu.push_back(tempItem);
-    }
-
-    return returnMenu;
-}
-*/
-/*
-void order::showMenu() //Reads Menu
-{
-    vector<item> menu = loadMenu();
-
-    for(auto& it: menu)
-    {
-        cout << "Item Name: " << it.name << endl;
-        cout << "Item ID: " << it.idNumber << endl;
-        cout << "Item Price: " << it.price << endl;
-    }
-}
-
-void order::addItem(int idNumber, int amount, vector<item> menu) //Adds Item to Order
-{
-    item tempItem;
+    MenuItem tempItem;
     //vector<item> menu = loadMenu();
     for(auto& it: menu)
     {
-        if(it.idNumber == idNumber)
+        if(it.idNumber == idNum)
         {
             tempItem.name = it.name;
             tempItem.idNumber = it.idNumber;
             tempItem.price = it.price;
             //tempItem.amount = amount;
             //items.insert(pair<item, int>(tempItem, amount));
-            for(int i = 0; i < amount; i++)
-            {
-                items.push(tempItem);
-            }
+            items.push(tempItem);
             break;
         }
     }
 }
 
-void order::getSummary() //Returns Summary
+void Order::deleteItems()
 {
-    cout << endl;
-    cout << "Order #" << orderID << ": " << endl;
-    string status = reportStatus();
-    cout << "Status: " << status << endl;
-    cout << "Items: " << endl;
-
-    /*map<item, int>::iterator it;
-    for(it = items.begin(); it != items.end(); it++)
-    {
-      cout << it->first.idNumber << " " << it->first.name << " (" << it->second << ")" << endl;
-    }
-    queue<item> copyQueue;
-    copyQueue = items;
-    for(int i = 0; i < items.size(); i++)
-    {
-        cout << copyQueue.front().idNumber << " " << copyQueue.front().name << endl;
-        copyQueue.pop();
-    }
-    cout << endl;
+  for(int i = 0; i < items.size(); i++)
+  {
+    items.pop();
+  }
 }
-*/
+
+double Order::getTotal()
+{
+  double tax = .10;
+  for(int i = 0; i < items.size(); i++)
+  {
+    totalPayment += items.front().price;
+    items.pop();
+  }
+  totalPayment = totalPayment + (totalPayment * tax);
+  return totalPayment;
+}
+
 void Order::setStatus(int setValue) //Set Value of Status
 {
     status = setValue;
@@ -335,13 +287,100 @@ string Order::reportStatus() //Returns Order Status
     default:
         returnValue = "No Status";
     }
-
-    return returnValue;
+  return returnValue;
 }
 
 void Order::finishOrder()
 {
-
+  
 }
+
+/*
+vector<item> order::loadMenu() //Creates Menu to Read
+{
+    vector<item> returnMenu;
+    ifstream fin;
+    fin.open("menu.txt");
+    int itemID = 0;
+    char* token;
+    char buf[1000];
+    const char* const tab = "\t";
+    while(fin.good())
+    {
+        string line;
+        getline(fin, line);
+        strcpy(buf, line.c_str());
+        if (buf[0] == 0) continue; // skip blank lines
+        //parse the line
+        const string name(token = strtok(buf, tab));
+        if (name.find('-') != string::npos) continue; // skip first line which has a dash in it
+        const string price((token = strtok(0, tab)) ? token : "");
+        const string avgPrepTime((token = strtok(0, tab)) ? token : "");
+        const string maxAmt((token = strtok(0, tab)) ? token : "");
+        item tempItem;
+        tempItem.name = name;
+        tempItem.idNumber = itemID;
+        itemID++;
+        tempItem.price = stod(price);
+        tempItem.avgPrepTime = stoi(avgPrepTime);
+        returnMenu.push_back(tempItem);
+    }
+    return returnMenu;
+}
+
+
+void order::showMenu() //Reads Menu
+{
+    vector<item> menu = loadMenu();
+    for(auto& it: menu)
+    {
+        cout << "Item Name: " << it.name << endl;
+        cout << "Item ID: " << it.idNumber << endl;
+        cout << "Item Price: " << it.price << endl;
+    }
+}
+void order::addItem(int idNumber, int amount, vector<item> menu) //Adds Item to Order
+{
+    item tempItem;
+    //vector<item> menu = loadMenu();
+    for(auto& it: menu)
+    {
+        if(it.idNumber == idNumber)
+        {
+            tempItem.name = it.name;
+            tempItem.idNumber = it.idNumber;
+            tempItem.price = it.price;
+            //tempItem.amount = amount;
+            //items.insert(pair<item, int>(tempItem, amount));
+            for(int i = 0; i < amount; i++)
+            {
+                items.push(tempItem);
+            }
+            break;
+        }
+    }
+}
+void order::getSummary() //Returns Summary
+{
+    cout << endl;
+    cout << "Order #" << orderID << ": " << endl;
+    string status = reportStatus();
+    cout << "Status: " << status << endl;
+    cout << "Items: " << endl;
+    map<item, int>::iterator it;
+    for(it = items.begin(); it != items.end(); it++)
+    {
+      cout << it->first.idNumber << " " << it->first.name << " (" << it->second << ")" << endl;
+    }
+    queue<item> copyQueue;
+    copyQueue = items;
+    for(int i = 0; i < items.size(); i++)
+    {
+        cout << copyQueue.front().idNumber << " " << copyQueue.front().name << endl;
+        copyQueue.pop();
+    }
+    cout << endl;
+}
+*/
 
 #endif /* Order_h */
