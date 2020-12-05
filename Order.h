@@ -195,12 +195,19 @@ bool Order::pay()
         cin >> input;
         if (input == 1)
         {
+          if(totalPayment == 0)
+          {
+            return false;
+          }
+          else
+          {
             cout << endl;
             cout << "Thank you!" << endl;
             cout << endl;
             cout << "Order Details: " << endl;
             printOrder();
             return true;
+          }
         }
         else if (input == -1)
         {
