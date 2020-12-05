@@ -6,6 +6,9 @@
 #ifndef Order_h
 #define Order_h
 
+#ifndef order_h
+#define order_h
+
 #include <iostream>
 #include <string>
 #include <cstdlib>
@@ -200,6 +203,9 @@ bool Order::pay()
         {
           if(totalPayment == 0)
           {
+            cout << endl;
+            cout << "Total is 0, cancelling order." << endl;
+            cout << endl;
             return false;
           }
           else
