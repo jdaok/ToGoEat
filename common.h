@@ -4,7 +4,7 @@ struct MenuItem
 {
     string name;
     int idNumber;
-    int type;        // 0 = food. 1 = drink. food takes longer
+    //int type;        // 0 = food. 1 = drink. food takes longer
     double price;        // ex. 1.50$
     int avgPrepTime;  // ex. 15 minutes
     bool finished = false;
@@ -17,7 +17,7 @@ vector<MenuItem> MENU;
 bool loadMenu(vector<MenuItem>& menu)
 {
   //Clear Menu
-  menu.clear()
+  menu.clear();
   
   ifstream fin;
   fin.open("menu.txt");
@@ -43,7 +43,7 @@ bool loadMenu(vector<MenuItem>& menu)
       const string price((token = strtok(0, tab)) ? token : "");
       const string avgPrepTime((token = strtok(0, tab)) ? token : "");
       const string maxAmt((token = strtok(0, tab)) ? token : "");
-      item tempItem;
+      MenuItem tempItem;
       tempItem.name = name;
       tempItem.idNumber = itemID;
       itemID++;
@@ -54,7 +54,28 @@ bool loadMenu(vector<MenuItem>& menu)
   return true;
 }
 
-void showMenu(const vector<MenuItem>& menu)
+void showMenu(const vector<MenuItem> menu)
+{
+    const int width2 = 12;
+
+    cout << right<<setw(width2) << "ID# " <<
+         setw(width2) << "name" <<
+         setw(width2) << "price" << endl;
+
+    cout << right<<setw(width2) << "----" <<
+         setw(width2) << "----" <<
+         setw(width2) << "-----" << endl;
+
+    for (int i = 0; i < menu.size(); i++)
+    {
+        cout << right<<setw(width2) << menu[i].idNumber <<
+             setw(width2) << menu[i].name <<
+             setw(width2) << menu[i].price << endl;
+
+    }
+}
+
+/*void showMenu(const vector<MenuItem>& menu)
 {
   bool next = loadMenu(menu);
   
@@ -66,6 +87,6 @@ void showMenu(const vector<MenuItem>& menu)
       cout << it.name << "\t" << it.idNumber << "\t" << it.price << endl;
     }
   }
-}
+}*/
 
 #endif /* common */
