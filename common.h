@@ -63,8 +63,28 @@ bool loadMenu(vector<MenuItem>& menu)
   return true;
 }
 
+//This has the spacing I was using.
+void showMenu(const vector<MenuItem> &menu)
+{
+    const int width2 = 24;
 
-void showMenu(const vector<MenuItem> menu)
+    cout << left<<setw(12) << "ID# " <<
+         setw(width2) << "name" <<
+         setw(width2) << "price" << endl;
+
+    cout << left<<setw(12) << "----" <<
+         setw(width2) << "----" <<
+         setw(width2) << "-----" << endl;
+
+    for (int i = 0; i < menu.size(); i++)
+    {
+        cout << left<<setw(12) << menu[i].idNumber <<
+             setw(width2) << menu[i].name <<
+             setw(width2) << menu[i].price << endl;
+    }
+}
+
+/*void showMenu(const vector<MenuItem> menu)
 {
     const int width2 = 20;
 
@@ -83,6 +103,6 @@ void showMenu(const vector<MenuItem> menu)
 
         cout << fixed << setprecision(2) << setw(width2) << menu[i].price <<" $"<< endl;
     }
-}
+}*/
 
 #endif /* common */
