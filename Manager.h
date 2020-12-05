@@ -15,11 +15,13 @@ using namespace std;
 class Manager
 {
 public:
+    vector<MenuItem> localMenu;
     Manager();
     int managerLoop();
+    void uploadMenuTXT();
 };
 
-Manager::Manager() //Default Constructor  setup the restaurant + load items
+Manager::Manager() //Default Constructor
 {
     string input;
 
@@ -27,11 +29,32 @@ Manager::Manager() //Default Constructor  setup the restaurant + load items
     getline(cin, input);
     cin.ignore(1000,10);
     restaurant.name = input;
-    cout<<endl<<"Great! Loading menu for "<<restaurant.name<<"... "<<endl;
 
-    loadMenu(MENU);
-    cout<<"Loaded "<<MENU.size()<<" items onto the menu."<<endl;
-    showMenu(MENU);
+    localMenu = MENU;
+
+    cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl;
+    showLocalMenu(localMenu);
+}
+
+void Manager::uploadMenuTXT() // upload vector menu to textfile
+{
+    ofstream outfile;
+    outfile.open("newMenu.txt");
+
+    char* token;
+    char buf[1000];
+    const char* const tab = "\t";
+
+    outfile<<"-name"<<"\t"<<"price"<<"\t"<<"avgPrepTime"<<endl;
+
+    for(int i=0; i< localMenu.size(); i++)
+    {
+        outfile<<localMenu[i].name<<"\t"<<localMenu[i].price<<"\t"<<localMenu[i].avgPrepTime<<"\t"<<endl;
+    }
+
+    outfile.close();
+    remove("menu.txt");
+    rename("newMenu.txt","menu.txt");
 }
 
 int Manager::managerLoop()
@@ -42,19 +65,23 @@ int Manager::managerLoop()
     while (true)
     {
         cout<<endl<<"Pick an action:"<<endl;
-        cout<<"                 [0] Continue"<<endl;
-        cout<<"                 [1] Add Item"<<endl;
-        cout<<"                 [2] Remove Item"<<endl;
-        cout<<"                 [3] Print Current Menu"<<endl;
+        cout<<"[0] Exit"<<endl;
+        cout<<"[1] Add Item"<<endl;
+        cout<<"[2] Remove Item"<<endl;
+        cout<<"[3] Print Current Menu      ";
 
         cin >> buf2;
         cin.ignore(1000,10);
         selection = stoi(buf2);
 
+        cout<<endl;
+
         switch (selection)
         {
         case 0:                     // break
         {
+            uploadMenuTXT();
+            MENU = localMenu;
             return 0;
             break;
         }
@@ -72,74 +99,39 @@ int Manager::managerLoop()
             cin.ignore(1000,10);
             tempItem.price = stod(buf2);
 
-
             cout<<"Ok. How many minutes will "<< tempItem.name<<" take to prepare?"<<endl;
             cin >> buf2;
             cin.ignore(1000,10);
             tempItem.avgPrepTime = stoi(buf2);
 
-            tempItem.idNumber = 999;
+            tempItem.idNumber = 999; // temp ID number.
 
-            MENU.push_back(tempItem); // add the item to the menu
-
-            fstream menustr;                             // sync the c++ menu with the text file by adding a line
-            menustr.open("menu.txt", fstream::app);
-            menustr<<tempItem.name<<"\t"<<tempItem.price<<"\t"<<tempItem.avgPrepTime<<"\t"<<endl;
-            menustr.close();
-
-            loadMenu(MENU);
-            showMenu(MENU);
+            localMenu.push_back(tempItem); // add the item to the menu
+            showLocalMenu(localMenu);
             cout<<endl<<"                        "<<tempItem.name<<" was added."<<endl;
             break;
 
         }
         case 2:
         {
-            string line, deleteID;
+            showLocalMenu(localMenu);
+            string deleteID;
             cout<<"Ok. Enter the ID to delete.";
             cin>>deleteID;
 
-            if (stoi(deleteID)<0 || stoi(deleteID) >= MENU.size())
+            if (stoi(deleteID)<0 || stoi(deleteID) >= localMenu.size())
             {
                 cout<<"INVALID ID. Try again."<<endl;
                 break;
             }
-
-            string deleteName = MENU[stoi(deleteID)].name; // find the name of the item of the id
-
-            ifstream file;
-            ofstream outfile;
-
-            file.open("menu.txt");               // create a new menu file and copy all the lines over except the deleted one
-            outfile.open("newMenu.txt");
-
-            char* token;
-            char buf[1000];
-            const char* const tab = "\t";
-
-
-            while(getline(file,line))
-            {
-                strcpy(buf, line.c_str());
-                if (buf[0] == 0) continue; // skip blank lines
-
-                const string searchName(token = strtok(buf, tab));
-                if(searchName!=deleteName)
-                    outfile<<line<<endl;
-            }
-            outfile.close();
-            file.close();
-            remove("menu.txt");
-            rename("newMenu.txt","menu.txt");
-
-            loadMenu(MENU);
-            showMenu(MENU);
+            string deleteName = localMenu[stoi(deleteID)].name;
+            localMenu.erase (localMenu.begin()+stoi(deleteID));
             cout<<endl<<"                        "<<deleteName<<" was deleted."<<endl;
             break;
         }
         case 3:    // show menu
         {
-            showMenu(MENU);
+            showLocalMenu(localMenu);
             break;
         }
         default:
