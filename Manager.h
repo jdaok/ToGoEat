@@ -28,11 +28,10 @@ Manager::Manager() //Default Constructor
     cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
     getline(cin, input);
     cin.ignore(1000,10);
-   // restaurant.name = input;
-
+                                                                                                       // restaurant.name = input;
+                                                                                                       // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl
+    if (MENU.empty()) loadMenu(MENU); // in case menu wasn't loaded
     localMenu = MENU;
-
-   // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl;
     showLocalMenu(localMenu);
 }
 
