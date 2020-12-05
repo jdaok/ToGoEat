@@ -131,7 +131,10 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             }
             break;
         case 2:
+            cout << endl;
+            cout << "Items Cleared." << endl;
             deleteItems();
+            cout << endl;
             break;
           case 3:
             cout << endl;
