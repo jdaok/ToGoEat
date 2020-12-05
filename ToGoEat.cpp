@@ -1,6 +1,9 @@
 //Programmer:Jiefeng Yang
 //Programmer's ID:1791121
 
+#define _CRT_SECURE_NO_WARNINGS
+
+
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -58,8 +61,6 @@ const string CONFIG_FILE_NAME = "simulation.txt";
 //void outputProgrammerInfo();
 bool loadSimulationConfig(string fileName, simulationConfig& config);
 void outputTitle(simulationConfig config);
-int getRandomNumberOfArrivals(double);
-int getServiceTime(const int, const int);
 
 bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulationConfig& config,
     const DynamicArray<ServerInfo>& servers);
@@ -90,6 +91,8 @@ int main()
     PriorityQueue<ServiceEvent> eventQueue;
     DynamicArray<ServerInfo> servers;
 
+    //loadMenu
+    loadMenu(MENU);
 
 
     for (int time = 0;; time++)
@@ -140,15 +143,14 @@ int main()
                 servers[i].status = true;
 
                 //TODO  order add getServiceTime() fuc
-                //int serviceTime = servers[i].order.getServiceTime();
+                int serviceTime = servers[i].order.getServiceTime();
 
                 waitLine.pop();
 
                 ServiceEvent temp;
                 //getServiceTime become the order prepare time 
                 //TODO  = time + serviceTime;
-                temp.serviceEndTime = time + getServiceTime(config.minSerTimeInterval,
-                    config.maxSerTimeInterval);
+                temp.serviceEndTime = time + serviceTime;
                 temp.serverNum = i;
                 eventQueue.push(temp);
             }
@@ -170,29 +172,7 @@ int main()
     return 0;
 }
 
-//*****************
-//Function name: getRandomNumberOfArrivals
-//Purpose: get Random Number Of Arrivals
-//averageArrivalRate: average Arrival Rate
-//Returns: Random Number Of Arrivals
-//Return type: int
-//*****************
-int getRandomNumberOfArrivals(double averageArrivalRate)
-{
-    int arrivals = 0;
-    double probOfnArrivals = exp(-averageArrivalRate);
-    for (double randomValue = (double)rand() / RAND_MAX;
-        (randomValue -= probOfnArrivals) > 0.0;
-        probOfnArrivals *= averageArrivalRate / static_cast<double>(++arrivals));
-    return arrivals;
-}
 
-
-
-int getServiceTime(const int min, const int max)
-{
-    return min + (rand() % max);
-}
 
 
 /*void outputProgrammerInfo()
