@@ -98,7 +98,8 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     //Create New Order
     //Order newOrder;
   
-    cout << "Displaying Menu:";
+    cout << "Displaying Menu:" << endl;
+    cout << endl;
     showMenu(menu);
   
     //Ask Name
@@ -133,6 +134,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             deleteItems();
             break;
           case 3:
+            cout << endl;
             printOrder();
             break;
         case -1:
@@ -211,14 +213,10 @@ bool Order::pay()
 /*void Order::createOrderItems(vector<MenuItem> menu) // add items to order items randomly
 {
     srand((unsigned)time(NULL));
-
     int maxAmount = rand() % 5;
     if (rand() % 2) maxAmount = 2;
     if (maxAmount == 0 || maxAmount == 1) maxAmount = 1;              // max amount of items in order. Most of the time, it's 1.
-
     // traverse menu and randomly decide to add MenuItem to order
-
-
     while(true)
     {
         int menuIndex = rand()%menu.size();
@@ -226,7 +224,6 @@ bool Order::pay()
         items.push(menu[menuIndex]);
         totalPayment += menu[menuIndex].price;
     }
-
     for(int i = 0; i < menu.size() ; i++)
     {
         int amount;
@@ -239,7 +236,6 @@ bool Order::pay()
             totalPayment += menu[i].price;
         }
     }
-
 }*/
 
 void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
@@ -286,7 +282,7 @@ int Order::getServiceTime()
 
 void Order::getTotal()
 {
-  //totalPayment = 0;
+  totalPayment = 0;
   double tax = .10;
   queue<MenuItem> copyQueue;
   copyQueue = items;
@@ -362,8 +358,6 @@ vector<MenuItem> order::loadMenu() //Creates Menu to Read
     }
     return returnMenu;
 }
-
-
 void order::showMenu() //Reads Menu
 {
     vector<MenuItem> menu = loadMenu();
