@@ -14,7 +14,8 @@ struct MenuItem
 vector<MenuItem> MENU;
 
 bool loadMenu(vector<MenuItem>&);
-void showMenu(vector<MenuItem>);
+void showMenu(const vector<MenuItem> &);
+void showLocalMenu(const vector<MenuItem>&);
 
 //Menu Functions
 
