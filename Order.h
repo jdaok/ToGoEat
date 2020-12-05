@@ -16,10 +16,11 @@
 #include <cstring>
 
 #include "common.h"
-#include "restaurant.h"
-#include "Manager.h"
+//#include "restaurant.h"
+//#include "Manager.h"
 
 using namespace std;
+
 
 class Order
 {
@@ -27,20 +28,20 @@ public:
     string name;
     int orderID;
     int status; //1 = Ordering, 2 = Cooking, 3 = Finished
-    queue<item> items;
+    queue<MenuItem> items;
     double totalPayment;
 
     Order(); //Default Constructor
-    void createOrderItems(vector<item> menu); //Creates Random Orders
+    void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
     //todo let user type the order
-    bool makeOrder(const vector<item> &menu);
+    bool makeOrder(const vector<MenuItem> &menu);
     //todo
     bool pay();
 
     int generateID();
 
     //Item Functions
-    void addItem(int, vector<item> menu);
+    void addItem(int, vector<MenuItem> menu);
     void deleteItems();
     void getTotal();
     int getServiceTime();
@@ -72,7 +73,7 @@ Order::Order() //Default Constructor
 
 void Order::printOrder()
 {
-    queue<item> itemsCopy = items;
+    queue<MenuItem> itemsCopy = items;
     while(itemsCopy.empty() == false)
     {
         cout<< itemsCopy.front().name<<endl;
@@ -92,10 +93,10 @@ int Order::generateID() //Generates Random ID
 }
 
 //todo let user type the order
-bool Order::makeOrder(const vector<item>& menu)
+bool Order::makeOrder(const vector<MenuItem>& menu)
 {
     //Create New Order
-    Order newOrder;
+    //Order newOrder;
   
     cout << "Displaying Menu:";
     showMenu(menu);
@@ -105,8 +106,8 @@ bool Order::makeOrder(const vector<item>& menu)
     cout << "Enter Customer Name: " << endl;
     string customerName;
     getline(cin, customerName);
-    newOrder.name = customerName;
-  
+    name = customerName;
+   
     int selection;
     bool next = false;
     do
@@ -125,11 +126,11 @@ bool Order::makeOrder(const vector<item>& menu)
             cin.ignore(1000, 10);
             if(itemID <= menu.size() && itemID > -1)
             {
-              newOrder.addItem(itemID, menu);
+              addItem(itemID, menu);
             }
             break;
         case 2:
-            newOrder.deleteItems();
+            deleteItems();
             break;
           case 3:
             printOrder();
@@ -159,7 +160,7 @@ bool Order::makeOrder(const vector<item>& menu)
         {
             //todo cancel the payment, need to delete the items
             //deleteItems();
-          newOrder.deleteItems();
+          deleteItems();
         }
         return ret;
     }
@@ -167,7 +168,7 @@ bool Order::makeOrder(const vector<item>& menu)
     {
         //todo cancel the payment, need to delete the items
             //deleteItems();
-        newOrder.deleteItems();
+        deleteItems();
         return false;
     }
     else
@@ -207,7 +208,7 @@ bool Order::pay()
 
 }
 
-void Order::createOrderItems(vector<item> menu) // add items to order items randomly
+/*void Order::createOrderItems(vector<MenuItem> menu) // add items to order items randomly
 {
     srand((unsigned)time(NULL));
 
@@ -215,7 +216,7 @@ void Order::createOrderItems(vector<item> menu) // add items to order items rand
     if (rand() % 2) maxAmount = 2;
     if (maxAmount == 0 || maxAmount == 1) maxAmount = 1;              // max amount of items in order. Most of the time, it's 1.
 
-    // traverse menu and randomly decide to add item to order
+    // traverse menu and randomly decide to add MenuItem to order
 
 
     while(true)
@@ -239,21 +240,23 @@ void Order::createOrderItems(vector<item> menu) // add items to order items rand
         }
     }
 
-}
+}*/
 
-void Order::addItem(int idNum, vector<item> menu) //Adds Item to Order
+void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
 {
-    item tempItem;
-    //vector<item> menu = loadMenu();
+    
+    MenuItem tempItem;
     for(auto& it: menu)
     {
         if(it.idNumber == idNum)
         {
+            
             tempItem.name = it.name;
             tempItem.idNumber = it.idNumber;
             tempItem.price = it.price;
+            tempItem.avgPrepTime = it.avgPrepTime;
             //tempItem.amount = amount;
-            //items.insert(pair<item, int>(tempItem, amount));
+            //items.insert(pair<MenuItem, int>(tempItem, amount));
             items.push(tempItem);
             break;
         }
@@ -264,14 +267,14 @@ void Order::deleteItems()
 {
   for(int i = 0; i < items.size(); i++)
   {
-    items.pop();
+        items.pop();
   }
 }
 
 int Order::getServiceTime()
 {
   int returnValue = 0;
-  queue<item> copyQueue;
+  queue<MenuItem> copyQueue;
   copyQueue = items;
   for(int i = 0; i < items.size(); i++)
   {
@@ -285,12 +288,12 @@ void Order::getTotal()
 {
   //totalPayment = 0;
   double tax = .10;
-  queue<item> copyQueue;
+  queue<MenuItem> copyQueue;
   copyQueue = items;
   for(int i = 0; i < items.size(); i++)
   {
     this->totalPayment += copyQueue.front().price;
-    items.pop();
+    copyQueue.pop();
   }
   this->totalPayment = this->totalPayment + (this->totalPayment * tax);
   cout << this->totalPayment << endl;
@@ -328,9 +331,9 @@ void Order::finishOrder()
 }
 
 /*
-vector<item> order::loadMenu() //Creates Menu to Read
+vector<MenuItem> order::loadMenu() //Creates Menu to Read
 {
-    vector<item> returnMenu;
+    vector<MenuItem> returnMenu;
     ifstream fin;
     fin.open("menu.txt");
     int itemID = 0;
@@ -349,7 +352,7 @@ vector<item> order::loadMenu() //Creates Menu to Read
         const string price((token = strtok(0, tab)) ? token : "");
         const string avgPrepTime((token = strtok(0, tab)) ? token : "");
         const string maxAmt((token = strtok(0, tab)) ? token : "");
-        item tempItem;
+        MenuItem tempItem;
         tempItem.name = name;
         tempItem.idNumber = itemID;
         itemID++;
@@ -363,7 +366,7 @@ vector<item> order::loadMenu() //Creates Menu to Read
 
 void order::showMenu() //Reads Menu
 {
-    vector<item> menu = loadMenu();
+    vector<MenuItem> menu = loadMenu();
     for(auto& it: menu)
     {
         cout << "Item Name: " << it.name << endl;
@@ -371,10 +374,10 @@ void order::showMenu() //Reads Menu
         cout << "Item Price: " << it.price << endl;
     }
 }
-void order::addItem(int idNumber, int amount, vector<item> menu) //Adds Item to Order
+void order::addItem(int idNumber, int amount, vector<MenuItem> menu) //Adds Item to Order
 {
-    item tempItem;
-    //vector<item> menu = loadMenu();
+    MenuItem tempItem;
+    //vector<MenuItem> menu = loadMenu();
     for(auto& it: menu)
     {
         if(it.idNumber == idNumber)
@@ -383,7 +386,7 @@ void order::addItem(int idNumber, int amount, vector<item> menu) //Adds Item to 
             tempItem.idNumber = it.idNumber;
             tempItem.price = it.price;
             //tempItem.amount = amount;
-            //items.insert(pair<item, int>(tempItem, amount));
+            //items.insert(pair<MenuItem, int>(tempItem, amount));
             for(int i = 0; i < amount; i++)
             {
                 items.push(tempItem);
@@ -399,12 +402,12 @@ void order::getSummary() //Returns Summary
     string status = reportStatus();
     cout << "Status: " << status << endl;
     cout << "Items: " << endl;
-    map<item, int>::iterator it;
+    map<MenuItem, int>::iterator it;
     for(it = items.begin(); it != items.end(); it++)
     {
       cout << it->first.idNumber << " " << it->first.name << " (" << it->second << ")" << endl;
     }
-    queue<item> copyQueue;
+    queue<MenuItem> copyQueue;
     copyQueue = items;
     for(int i = 0; i < items.size(); i++)
     {

@@ -89,18 +89,4 @@ void showMenu(const vector<MenuItem> &menu)
     }
 }
 
-/*void showMenu(const vector<MenuItem>& menu)
-{
-  bool next = loadMenu(menu);
-  
-  if(next)
-  {
-    cout << "Name:\t" << "ID:\t" << "Price:\t" << endl;
-    for(auto& it: menu)
-    {
-      cout << it.name << "\t" << it.idNumber << "\t" << it.price << endl;
-    }
-  }
-}*/
-
 #endif /* common */
