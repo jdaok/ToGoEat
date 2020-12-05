@@ -62,6 +62,10 @@ Order::Order() //Default Constructor
     orderID = generateID();
     status = 1;
     totalPayment = 0;
+    for(int i = 0; i < items.size(); i++)
+    {
+      items.pop();
+    }
     //todo remark this one. we let user input the menu
     //createOrderItems(menu);
 }
@@ -69,7 +73,6 @@ Order::Order() //Default Constructor
 
 void Order::printOrder()
 {
-
     queue<MenuItem> itemsCopy = items;
     while(itemsCopy.empty() == false)
     {
@@ -77,7 +80,7 @@ void Order::printOrder()
         itemsCopy.pop();
     }
   
-    totalPayment = getTotal();
+    getTotal();
 
     cout<<"----- Total $: " << totalPayment <<endl;
 }
@@ -280,7 +283,7 @@ int Order::getServiceTime()
 
 double Order::getTotal()
 {
-  //totalPayment = 0;
+  totalPayment = 0;
   double tax = .10;
   queue<MenuItem> copyQueue;
   copyQueue = items;
