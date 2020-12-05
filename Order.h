@@ -42,6 +42,7 @@ public:
     void addItem(int, vector<MenuItem> menu);
     void deleteItems();
     double getTotal();
+    int getServiceTime();
 
     //Status Functions
     void setStatus(int);
@@ -95,6 +96,8 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     showMenu(menu);
   
     //Ask Name
+    cout << endl;
+    cout << "Enter Customer Name: " << endl;
     string customerName;
     getline(cin, customerName);
     newOrder.name = customerName;
@@ -104,6 +107,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     do
     {
         cout << "Select an option [1 = Add Item, 2 = Clear Items, -1 = Finish, -2 = Cancel]";
+        cout << endl;
         cin >> selection;
         cin.ignore();
 
@@ -251,6 +255,19 @@ void Order::deleteItems()
   {
     items.pop();
   }
+}
+
+int Order::getServiceTime()
+{
+  int returnValue = 0;
+  queue<MenuItem> copyQueue;
+  copyQueue = items;
+  for(int i = 0; i < items.size(); i++)
+  {
+    returnValue += copyQueue.front().avgPrepTime;
+    copyQueue.pop();
+  }
+  return returnValue;
 }
 
 double Order::getTotal()
