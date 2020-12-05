@@ -79,11 +79,10 @@ void showMenu(const vector<MenuItem> menu)
     for (int i = 0; i < menu.size(); i++)
     {
         cout << right<<setw(width2) << menu[i].idNumber <<
-             setw(width2) << menu[i].name <<
-             setw(width2) << menu[i].price << endl;
+             setw(width2) << menu[i].name;
+
+        cout << fixed << setprecision(2) << setw(width2) << menu[i].price <<" $"<< endl;
     }
 }
-
-
 
 #endif /* common */
