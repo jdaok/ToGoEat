@@ -1,41 +1,40 @@
 #ifndef MANAGER_H
 #define MANAGER_H
+
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <cstdlib>
-#include <map>
+
+#include <string>
 #include <cstring>
-#include <iomanip>
 
 #include "Restaurant.h"
+#include "common.h"
 using namespace std;
 
-// prototypes
-
-void managerSetup();
-int manager();
-
-
-void managerSetup()
+class Manager
 {
+public:
+    Manager();
+    int managerLoop();
+};
 
+Manager::Manager() //Default Constructor  setup the restaurant + load items
+{
     string input;
 
-
     cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
-    cin >> input;
+    getline(cin, input);
+    cin.ignore(1000,10);
     restaurant.name = input;
     cout<<endl<<"Great! Loading menu for "<<restaurant.name<<"... "<<endl;
 
-    loadMenu();
-    cout<<"Loaded "<<menu.size()<<" items onto the menu."<<endl;
-
+    loadMenu(MENU);
+    cout<<"Loaded "<<MENU.size()<<" items onto the menu."<<endl;
+    showMenu(MENU);
 }
 
-
-
-int manager()
+int Manager::managerLoop()
 {
     string buf2;
     int selection;
@@ -49,7 +48,7 @@ int manager()
         cout<<"                 [3] Print Current Menu"<<endl;
 
         cin >> buf2;
-        cin.ignore();
+        cin.ignore(1000,10);
         selection = stoi(buf2);
 
         switch (selection)
@@ -62,7 +61,7 @@ int manager()
         case 1:                     // add item
         {
             string userInput;         // get user input
-            item tempItem;
+            MenuItem tempItem;
             cout<<"Ok. What is the item name?"<<endl;
             cin >> buf2;
             cin.ignore(1000,10);
@@ -79,24 +78,18 @@ int manager()
             cin.ignore(1000,10);
             tempItem.avgPrepTime = stoi(buf2);
 
+            tempItem.idNumber = 999;
 
-            tempItem.idNumber = menu.size();
-
-            if (!restaurant.deletedIDs.empty()){ // if theres a whole in the ID's from removing, use it instead of creating a new ID
-                tempItem.idNumber = restaurant.deletedIDs.top();
-                restaurant.deletedIDs.pop();
-            }
-
-            menu.push_back(tempItem); // add the item to the menu
-
-            showMenu(menu);
+            MENU.push_back(tempItem); // add the item to the menu
 
             fstream menustr;                             // sync the c++ menu with the text file by adding a line
             menustr.open("menu.txt", fstream::app);
-            menustr<<tempItem.idNumber<<"\t"<<tempItem.name<<"\t"<<tempItem.price<<"\t"<<tempItem.avgPrepTime<<"\t"<<endl;
+            menustr<<tempItem.name<<"\t"<<tempItem.price<<"\t"<<tempItem.avgPrepTime<<"\t"<<endl;
             menustr.close();
 
-            cout<<"                                  "<<tempItem.name<<" was added."<<endl;
+            loadMenu(MENU);
+            showMenu(MENU);
+            cout<<endl<<"                        "<<tempItem.name<<" was added."<<endl;
             break;
 
         }
@@ -105,6 +98,14 @@ int manager()
             string line, deleteID;
             cout<<"Ok. Enter the ID to delete.";
             cin>>deleteID;
+
+            if (stoi(deleteID)<0 || stoi(deleteID) >= MENU.size())
+            {
+                cout<<"INVALID ID. Try again."<<endl;
+                break;
+            }
+
+            string deleteName = MENU[stoi(deleteID)].name; // find the name of the item of the id
 
             ifstream file;
             ofstream outfile;
@@ -122,8 +123,8 @@ int manager()
                 strcpy(buf, line.c_str());
                 if (buf[0] == 0) continue; // skip blank lines
 
-                const string searchID(token = strtok(buf, tab));
-                if(searchID!=deleteID)
+                const string searchName(token = strtok(buf, tab));
+                if(searchName!=deleteName)
                     outfile<<line<<endl;
             }
             outfile.close();
@@ -131,15 +132,14 @@ int manager()
             remove("menu.txt");
             rename("newMenu.txt","menu.txt");
 
-            restaurant.deletedIDs.push(stoi(deleteID));     // save the deleted ID
-
-            menu.clear();                   // refresh the c++ menu to sync
-            loadMenu();
+            loadMenu(MENU);
+            showMenu(MENU);
+            cout<<endl<<"                        "<<deleteName<<" was deleted."<<endl;
             break;
         }
         case 3:    // show menu
         {
-            showMenu(menu);
+            showMenu(MENU);
             break;
         }
         default:
@@ -150,4 +150,3 @@ int manager()
 }
 
 #endif
-
