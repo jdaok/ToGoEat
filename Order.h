@@ -35,7 +35,6 @@ public:
     //todo let user type the order
     bool makeOrder(const vector<MenuItem> &menu);
     //todo
-    bool pay();
 
     int generateID();
 
@@ -52,7 +51,8 @@ public:
     void printOrder();
 
     //Paying Functions
-    void finishOrder();
+    bool pay();
+    //void finishOrder();
 
 };
 
@@ -143,7 +143,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             break;
         case '4':
             //finish the order
-            finishOrder();
+            //finishOrder();
             next = true;
             break;
         case '5':
@@ -342,10 +342,10 @@ string Order::reportStatus() //Returns Order Status
   return returnValue;
 }
 
-void Order::finishOrder()
+/*void Order::finishOrder()
 {
   
-}
+}*/
 
 /*
 vector<MenuItem> order::loadMenu() //Creates Menu to Read
