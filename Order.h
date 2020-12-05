@@ -27,22 +27,22 @@ public:
     string name;
     int orderID;
     int status; //1 = Ordering, 2 = Cooking, 3 = Finished
-    queue<MenuItem> items;
+    queue<item> items;
     double totalPayment;
 
     Order(); //Default Constructor
-    void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
+    void createOrderItems(vector<item> menu); //Creates Random Orders
     //todo let user type the order
-    bool makeOrder(const vector<MenuItem> &menu);
+    bool makeOrder(const vector<item> &menu);
     //todo
     bool pay();
 
     int generateID();
 
     //Item Functions
-    void addItem(int, vector<MenuItem> menu);
+    void addItem(int, vector<item> menu);
     void deleteItems();
-    double getTotal();
+    void getTotal();
     int getServiceTime();
 
     //Status Functions
@@ -70,10 +70,9 @@ Order::Order() //Default Constructor
     //createOrderItems(menu);
 }
 
-
 void Order::printOrder()
 {
-    queue<MenuItem> itemsCopy = items;
+    queue<item> itemsCopy = items;
     while(itemsCopy.empty() == false)
     {
         cout<< itemsCopy.front().name<<endl;
@@ -93,7 +92,7 @@ int Order::generateID() //Generates Random ID
 }
 
 //todo let user type the order
-bool Order::makeOrder(const vector<MenuItem>& menu)
+bool Order::makeOrder(const vector<item>& menu)
 {
     //Create New Order
     Order newOrder;
@@ -185,7 +184,8 @@ bool Order::pay()
     int input = 0;
     while (true)
     {
-      cout << "The total is: " << getTotal() << endl;
+      getTotal();
+      cout << "The total is: " << totalPayment << endl;
         cout << "[1 = Pay, -1 = Cancel]" << endl;
         cin >> input;
         if (input == 1)
@@ -207,7 +207,7 @@ bool Order::pay()
 
 }
 
-void Order::createOrderItems(vector<MenuItem> menu) // add items to order items randomly
+void Order::createOrderItems(vector<item> menu) // add items to order items randomly
 {
     srand((unsigned)time(NULL));
 
@@ -241,9 +241,9 @@ void Order::createOrderItems(vector<MenuItem> menu) // add items to order items 
 
 }
 
-void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
+void Order::addItem(int idNum, vector<item> menu) //Adds Item to Order
 {
-    MenuItem tempItem;
+    item tempItem;
     //vector<item> menu = loadMenu();
     for(auto& it: menu)
     {
@@ -271,7 +271,7 @@ void Order::deleteItems()
 int Order::getServiceTime()
 {
   int returnValue = 0;
-  queue<MenuItem> copyQueue;
+  queue<item> copyQueue;
   copyQueue = items;
   for(int i = 0; i < items.size(); i++)
   {
@@ -281,19 +281,20 @@ int Order::getServiceTime()
   return returnValue;
 }
 
-double Order::getTotal()
+void Order::getTotal()
 {
-  totalPayment = 0;
+  //totalPayment = 0;
   double tax = .10;
-  queue<MenuItem> copyQueue;
+  queue<item> copyQueue;
   copyQueue = items;
   for(int i = 0; i < items.size(); i++)
   {
-    totalPayment += copyQueue.front().price;
+    this->totalPayment += copyQueue.front().price;
     items.pop();
   }
-  totalPayment = totalPayment + (totalPayment * tax);
-  return totalPayment;
+  this->totalPayment = this->totalPayment + (this->totalPayment * tax);
+  cout << this->totalPayment << endl;
+  //return totalPayment;
 }
 
 void Order::setStatus(int setValue) //Set Value of Status
