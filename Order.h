@@ -60,6 +60,7 @@ Order::Order() //Default Constructor
 
     orderID = generateID();
     status = 1;
+    totalPayment = 0;
     //todo remark this one. we let user input the menu
     //createOrderItems(menu);
 }
@@ -122,8 +123,10 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             {
               newOrder.addItem(itemID, menu);
             }
+            break;
         case 2:
             newOrder.deleteItems();
+            break;
         case -1:
             //finish the order
             finishOrder();
