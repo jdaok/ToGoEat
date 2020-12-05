@@ -135,6 +135,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             break;
           case 3:
             cout << endl;
+            cout << "Order Details: " << endl;
             printOrder();
             break;
         case -1:
@@ -147,7 +148,8 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             break;
         default:
             cout << "Incorrect menu ID, please enter a correct one.";
-
+            selection = 0;
+            break;
         }
        
     } while (!next);
@@ -193,12 +195,16 @@ bool Order::pay()
         cin >> input;
         if (input == 1)
         {
+            cout << endl;
             cout << "Thank you!" << endl;
+            cout << endl;
+            cout << "Order Details: " << endl;
             printOrder();
             return true;
         }
         else if (input == -1)
         {
+            cout << endl;
             cout << "Order has been cancelled." << endl;
             return false;
         }
@@ -292,7 +298,7 @@ void Order::getTotal()
     copyQueue.pop();
   }
   this->totalPayment = this->totalPayment + (this->totalPayment * tax);
-  cout << this->totalPayment << endl;
+  //cout << this->totalPayment << endl;
   //return totalPayment;
 }
 
