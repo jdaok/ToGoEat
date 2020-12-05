@@ -75,7 +75,7 @@ void pauseForUserEnter();
 int main()
 {
     //for rand() only call once. using static_cast to fix the warning that data type conversion may lose data. 
-    srand(static_cast<unsigned int>(time(0))); rand();
+    //srand(static_cast<unsigned int>(time(0))); rand();
     //outputProgrammerInfo();
 
     simulationConfig config;  //simulation config data
@@ -98,7 +98,8 @@ int main()
     for (int time = 0;; time++)
     {
         //handle all services scheduled
-        while (!eventQueue.empty() && eventQueue.top().serviceEndTime == time)
+        //while (!eventQueue.empty() && eventQueue.top().serviceEndTime == time)
+        while (!eventQueue.empty() && eventQueue.top().serviceEndTime <= time)
         {
             servers[eventQueue.top().serverNum].status = false;
             eventQueue.pop();
@@ -271,13 +272,8 @@ void outputTitle(simulationConfig config)
 {
     cout << "********Welcome to the ToGoEat********" << endl;
     cout << setw(W1) << left << "number of chef:" << config.chefNumber << endl;
-    cout << setw(W1) << left << "Order arrival rate:" << config.aveCustArrivalRate
-        << right << setw(16) << "per minute, for" << setw(3) << config.timeAtNewArrStop << setw(8) << "minutes" << endl;
-    cout << setw(W1) << left << "maximum queue length:" << config.maxLenWaitQue << endl;
-    cout << setw(W1) << left << "minimum service time:" << config.minSerTimeInterval << right << setw(8)
-        << "minutes" << endl;
-    cout << setw(W1) << left << "maximum service time:" << config.maxSerTimeInterval << right << setw(8)
-        << "minutes" << endl << endl;
+    cout << setw(W1) << left << "The time to stop the new order: " << setw(3) << config.timeAtNewArrStop << endl;
+    cout << setw(W1) << left << "maximum queue length:" << config.maxLenWaitQue << endl << endl;
 }
 
 
@@ -324,27 +320,31 @@ void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfi
     const DynamicArray<ServerInfo>& servers)
 {
     cout << left << setw(6) << "Time:" << time << right << endl;
-    string title1 = "chef  ", title2 = "now serving", title3 = "wait queue";
-    int title1Len = title1.length(), title2Len = title2.length(), title3Len = title3.length();
-    int row2Wide = title2Len + 2, row3Wide = title3Len + 2;
+    string title1 = "chef  ", title2 = "now serving", title3 = "customer Name", title4 = "wait queue";
+    int title1Len = title1.length(), title2Len = title2.length(), title3Len = title3.length()
+        , title4Len = title4.length();
+    int row2Wide = title2Len + 2, row3Wide = title3Len + 2, row4Wide = title4Len + 2;;
 
-    string splitSign(title1Len + title2Len + title3Len + 2, '-');
+    string splitSign(title1Len + title2Len + title3Len + 2 + title4Len + 2, '-');
     cout << splitSign << endl;
 
-    cout << title1 << setw(row2Wide) << title2 << setw(row3Wide) << title3 << endl;
+    cout << title1 << setw(row2Wide) << title2 << setw(row3Wide) << title3 << setw(row4Wide) << title4 
+        << endl;
     cout << string(title1Len, '-') << setw(row2Wide) << string(title2Len, '-')
-        << setw(row3Wide) << string(title3Len, '-') << endl;
+        << setw(row3Wide) << string(title3Len, '-') << setw(row4Wide) << string(title4Len, '-') << endl;
 
     for (int i = 0; i < config.chefNumber; i++)
     {
-        cout << setw(3) << i;
+        cout << left << setw(title1Len+2) << i;
         if (servers[i].status)
         {
-            cout.width(10);
+            cout.width(row2Wide);
             cout << servers[i].order.orderID;
+            cout.width(row3Wide);
+            cout << servers[i].order.name;
             if (i == 0 && !waitLine.empty())
             {
-                cout << setw(9);
+                cout << setw(row4Wide);
                 Queue<Order> temp = waitLine;
                 while (temp.size() != 0)
                 {
