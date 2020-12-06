@@ -3,7 +3,6 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -20,8 +19,6 @@ using namespace std;
 #include "Order.h"
 #include "Manager.h"
 
-
-
 struct ServiceEvent
 {
     int serverNum;
@@ -37,7 +34,7 @@ struct ServerInfo
 //for comparing ServiceEvent in PriorityQueue template
 bool operator<(const ServiceEvent& a, const ServiceEvent& b)
 {
-    //swith to lo-to-hi priority
+    //switch to lo-to-hi priority
     return b.serviceEndTime < a.serviceEndTime;
 }
 
@@ -244,8 +241,9 @@ bool loadSimulationConfig(string fileName, simulationConfig& config)
 
 
         fin.close(); // done with the file
-        return ret;
+
     }
+    return ret;
 }
 
 
@@ -261,7 +259,7 @@ void outputTitle(simulationConfig config)
     cout << "******** Welcome to "<< config.restaurantName <<"! ********" << endl;
     cout << setw(W1) << left << "Chefs at work:" << config.chefNumber << endl;
     cout << setw(W1) << left << "Closing time: " << setw(3) << config.timeAtNewArrStop << endl;
-    cout << setw(W1) << left << "Orde aitlist size: " << config.maxLenWaitQue << endl;
+    cout << setw(W1) << left << "Order Waitlist size: " << config.maxLenWaitQue << endl;
     cout << setw(W1) << left << "Total revenue: " << config.totalRevenue << endl << endl;
 }
 
@@ -270,6 +268,7 @@ void outputTitle(simulationConfig config)
 bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulationConfig& config,
                          const DynamicArray<ServerInfo>& servers)
 {
+    string kesh;
     bool end = false;
     if (waitLine.empty() && time >= config.timeAtNewArrStop)
     {
