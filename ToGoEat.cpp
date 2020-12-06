@@ -19,21 +19,14 @@ using namespace std;
 #include "Queue.h"
 
 #include "Order.h"
+#include "Manager.h"
 
 struct simulationConfig
 {
     int chefNumber; //the number of chefs
     int timeAtNewArrStop; //the clock time at which new arrivals stop, in minutes(> 0, whole number)
-
-    //TODO maybe don't need those
-    double aveCustArrivalRate; //the average arrival rate of customers, per minute (greater than 0.0, floating point)
     int maxLenWaitQue; //the maximum length of the wait queue(1 or more, whole number)
-    int minSerTimeInterval; //the minimum service time interval, in minutes(1 or more, whole number)
-    int maxSerTimeInterval; //the maximum service time interval, in minutes(>= minimum service time interval, whole number)
-    
 };
-
-//ToDo will change to Order
 
 
 struct ServiceEvent
@@ -70,7 +63,7 @@ void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfi
 
 
 void pauseForUserEnter();
-
+int askMode();
 
 int main()
 {
@@ -91,98 +84,89 @@ int main()
     PriorityQueue<ServiceEvent> eventQueue;
     DynamicArray<ServerInfo> servers;
 
+    //Modes
+    int mode = 0; //1 - Customer, 2 - Manager
+    mode = askMode();
+    cin.ignore();
+    cout << endl;
+
+
     //loadMenu
     loadMenu(MENU);
 
-
-    for (int time = 0;; time++)
+    //Manager side
+    if (mode == 2)
     {
-        //handle all services scheduled
-        //while (!eventQueue.empty() && eventQueue.top().serviceEndTime == time)
-        while (!eventQueue.empty() && eventQueue.top().serviceEndTime <= time)
+        Manager manager;
+        manager.managerLoop();
+    }
+    else if (mode == 1)
+    {
+        for (int time = 0;; time++)
         {
-            servers[eventQueue.top().serverNum].status = false;
-            eventQueue.pop();
-        }
-        //handle new arrivals
-        //pause for the user to press ENTER
-        pauseForUserEnter();
-        
-        //Todo notice user to chose the food and make order
-        //change the random order to user type order
-        if (waitLine.size() < config.maxLenWaitQue)
-        {
-            Order tempOrder;
-            bool ret = tempOrder.makeOrder(MENU);
-            if (ret)
+            //handle all services scheduled
+            //while (!eventQueue.empty() && eventQueue.top().serviceEndTime == time)
+            while (!eventQueue.empty() && eventQueue.top().serviceEndTime <= time)
             {
-                waitLine.push(tempOrder);
+                servers[eventQueue.top().serverNum].status = false;
+                eventQueue.pop();
             }
-        }
-        /*if (time < config.timeAtNewArrStop)
-        {
-            int arrivalNum = getRandomNumberOfArrivals(config.aveCustArrivalRate);
-            for (int i = 0; i < arrivalNum; i++)
+            //handle new arrivals
+            //pause for the user to press ENTER
+            pauseForUserEnter();
+
+            //Todo notice user to chose the food and make order
+            //change the random order to user type order
+            if (waitLine.size() < config.maxLenWaitQue)
             {
-                if (waitLine.size() < config.maxLenWaitQue)
+                Order tempOrder;
+                bool ret = tempOrder.makeOrder(MENU);
+                if (ret)
                 {
-                    Order temp;
-                    temp.arrivalTime = time;
-                    temp.id = genrateOrderID();
-                    waitLine.push(temp);
+                    waitLine.push(tempOrder);
                 }
             }
-        }*/
-
-        // for idle servers, move Order from wait queue and begin service for each server
-        for (int i = 0; i < config.chefNumber; i++)
-        {
-            if (!servers[i].status && !waitLine.empty())
+       
+            // for idle servers, move Order from wait queue and begin service for each server
+            for (int i = 0; i < config.chefNumber; i++)
             {
-                //TODO here is the order
-                servers[i].order = waitLine.front();  
-                servers[i].status = true;
+                if (!servers[i].status && !waitLine.empty())
+                {
+                    //TODO here is the order
+                    servers[i].order = waitLine.front();
+                    servers[i].status = true;
 
-                //TODO  order add getServiceTime() fuc
-                int serviceTime = servers[i].order.getServiceTime();
+                    //ServiceTime for this order
+                    int serviceTime = servers[i].order.getServiceTime();
 
-                waitLine.pop();
+                    waitLine.pop();
 
-                ServiceEvent temp;
-                //getServiceTime become the order prepare time 
-                //TODO  = time + serviceTime;
-                temp.serviceEndTime = time + serviceTime;
-                temp.serverNum = i;
-                eventQueue.push(temp);
+                    ServiceEvent temp;
+                    temp.serviceEndTime = time + serviceTime;
+                    temp.serverNum = i;
+                    eventQueue.push(temp);
+                }
             }
+
+            outputSummary(time, waitLine, config, servers);
+            //TODO maybe don't need this
+            outputServiceEndingTime(eventQueue);
+
+            if (shouldEndSimulation(time, waitLine, config, servers))
+                break;
+
         }
 
-        outputSummary(time, waitLine, config, servers);
-        //TODO maybe don't need this
-        outputServiceEndingTime(eventQueue);
+        //TODO output the total numer of the order and total amount of money the restaurant made.
 
-        if (shouldEndSimulation(time, waitLine, config, servers))
-            break;
-
+        cout << endl << "Done!" << endl;
     }
-
-    //TODO output the total numer of the order and total amount of money the restaurant made.
-
-    cout << endl << "Done!" << endl;
 
     return 0;
 }
 
 
 
-
-/*void outputProgrammerInfo()
-{
-    cout << "Programmer: Jiefeng Yang\n";
-    cout << "Programmer's ID: 1791121\n";
-    cout << "File: " << __FILE__ << endl;
-    cout << endl;
-}*/
 
 //*****************
 //Function name: loadSimulationConfig
@@ -209,15 +193,7 @@ bool loadSimulationConfig(string fileName, simulationConfig& config)
             ret = false;
         }
 
-        getline(fin, line);
-        config.aveCustArrivalRate = atof(line.c_str());
-        if (config.aveCustArrivalRate < 0.0)
-        {
-            cout << "Config Error:the average arrival rate of Orders/per minute need to greater than 0.0."
-                << endl;
-            ret = false;
-        }
-
+   
         getline(fin, line);
         config.maxLenWaitQue = atoi(line.c_str());
         if (config.maxLenWaitQue < 1)
@@ -226,22 +202,7 @@ bool loadSimulationConfig(string fileName, simulationConfig& config)
             ret = false;
         }
 
-        getline(fin, line);
-        config.minSerTimeInterval = atoi(line.c_str());
-        if (config.minSerTimeInterval < 1)
-        {
-            cout << "Config Error:the minimum service time interval in minutes need to be 1 or more, whole number." << endl;
-            ret = false;
-        }
-
-        getline(fin, line);
-        config.maxSerTimeInterval = atoi(line.c_str());
-        if (config.maxSerTimeInterval < config.minSerTimeInterval)
-        {
-            cout << "Config Error:the maximum service time interval need to >= minimum service time interval" << endl;
-            ret = false;
-        }
-
+   
         getline(fin, line);
         config.timeAtNewArrStop = atoi(line.c_str());
         if (config.timeAtNewArrStop < 0)
@@ -278,26 +239,6 @@ void outputTitle(simulationConfig config)
 
 
 
-//TODO don't need this. Just get the cusomter name from the order
-//*****************
-//Function name: genrateOrderID
-//Purpose: genrate Order ID
-//Returns: Order ID
-//Return type: char
-//*****************
-char genrateOrderID()
-{
-    static int number = 0;
-    int index = number % 26; //reuse the 26 letter A-Z
-
-    char ID = 'A' + index;
-    number++;
-
-    return ID;
-}
-
-
-
 bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulationConfig& config,
     const DynamicArray<ServerInfo>& servers)
 {
@@ -320,7 +261,7 @@ void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfi
     const DynamicArray<ServerInfo>& servers)
 {
     cout << left << setw(6) << "Time:" << time << right << endl;
-    string title1 = "chef  ", title2 = "now serving", title3 = "customer Name", title4 = "wait queue";
+    string title1 = "chef  ", title2 = "now serving", title3 = "customer Name   ", title4 = "wait queue";
     int title1Len = title1.length(), title2Len = title2.length(), title3Len = title3.length()
         , title4Len = title4.length();
     int row2Wide = title2Len + 2, row3Wide = title3Len + 2, row4Wide = title4Len + 2;;
@@ -365,7 +306,7 @@ void outputServiceEndingTime(const PriorityQueue<ServiceEvent>& eventQueue)
     cout << "------ + -----------------------" << endl;
     for (PriorityQueue<ServiceEvent> temp = eventQueue; !temp.empty(); temp.pop())
     {
-        cout.width(4);
+        cout.width(7);
         cout << temp.top().serverNum << setw(4) << "|";
         cout.width(6);
         cout << temp.top().serviceEndTime << endl;
@@ -391,6 +332,39 @@ void pauseForUserEnter()
     cout << "Press ENTER to make a order..." << endl;
     while (getchar() != '\n');
     cout << endl;
+}
+
+
+int askMode() //Ask for Customer or Manager
+{
+    string buf = "";
+    int buffer = 0, returnValue = 0;
+    bool valid = false;
+
+    while (valid == false)
+    {
+        cout << endl;
+        cout << "Customer or manager? [1 = Customer, 2 = Manager]" << endl;
+        cin >> buf;
+        buffer = atoi(buf.c_str());
+
+        switch (buffer)
+        {
+        case 1:
+            returnValue = 1;
+            valid = true;
+            break;
+        case 2:
+            returnValue = 2;
+            valid = true;
+            break;
+        default:
+            cout << endl;
+            cout << "Invalid input, try again." << endl;
+        }
+    }
+
+    return returnValue;
 }
 
 
