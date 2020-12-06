@@ -288,7 +288,7 @@ void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfi
                    const DynamicArray<ServerInfo>& servers)
 {
     cout << left << setw(6) << "Time:" << time << right << endl;
-    string title1 = "chef  ", title2 = "now serving", title3 = "customer Name   ", title4 = "wait queue";
+    string title1 = "chef  ", title2 = "now serving", title3 = "customer name   ", title4 = "wait queue";
     int title1Len = title1.length(), title2Len = title2.length(), title3Len = title3.length()
                     , title4Len = title4.length();
     int row2Wide = title2Len + 2, row3Wide = title3Len + 2, row4Wide = title4Len + 2;;
