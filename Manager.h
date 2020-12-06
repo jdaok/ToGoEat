@@ -14,8 +14,8 @@ using namespace std;
 
 class Manager
 {
-public:
     vector<MenuItem> localMenu;
+public:
     Manager();
     int managerLoop();
     void uploadMenuTXT();
@@ -76,6 +76,7 @@ int Manager::managerLoop()
         }
         catch(exception &err)
         {
+            string temp = err.what();
             selection = 4; // error handling => selection = default switch
         }
         cout<<endl;
@@ -108,6 +109,7 @@ int Manager::managerLoop()
             }
             catch(exception &err)
             {
+                string temp = err.what();
                 cout << "Please try again and  enter a valid double.  "<<endl;
                 break;
             }
@@ -121,6 +123,7 @@ int Manager::managerLoop()
             }
             catch(exception &err)
             {
+                string temp = err.what();
                 cout << "Please try again and enter a valid integer.  "<<endl;
                 break;
             }
@@ -142,7 +145,7 @@ int Manager::managerLoop()
 
             try
             {
-                if (stoi(deleteID)<0 || stoi(deleteID) >= localMenu.size())
+                if (stoi(deleteID)<0 || stoi(deleteID) >= (int)localMenu.size())
                 {
                     cout<<"Please try again and enter a valid integer."<<endl;
                     break;
@@ -150,6 +153,7 @@ int Manager::managerLoop()
             }
             catch(exception &err)
             {
+                string temp = err.what();
                 cout << "Please try again and enter a valid integer."<<endl;
                 break;
             }
@@ -170,6 +174,8 @@ int Manager::managerLoop()
         }
 
     }
+
+    return 0;
 }
 
 #endif

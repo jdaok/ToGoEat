@@ -139,6 +139,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
         }
         catch(exception &err)
         {
+            string temp = err.what();
             selection = 6; // error handling => selection = default switch
         }
         cout<<endl;
@@ -162,8 +163,9 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             }
             catch (exception& err)
             {
+                string temp = err.what();
                 cout << endl;
-                cout << "Please enter a valid ID." << endl;
+				cout << "Please enter a valid input." << endl;
                 break;
             }
             break;
@@ -225,7 +227,6 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     }
 }
 
-//todo
 bool Order::pay()
 {
     //show the items and their price, the tax(sum of items price*defalut tax rate), total price
@@ -248,6 +249,7 @@ bool Order::pay()
         }
         catch(exception &err)
         {
+            string temp = err.what();
             input = 3; // error handling => retry
         }
 
@@ -335,7 +337,6 @@ int Order::getServiceTime()
 void Order::getTotal()
 {
     totalPayment = 0;
-    double tax = .10;
     queue<MenuItem> copyQueue;
     copyQueue = items;
     for (unsigned int i = 0; i < items.size(); i++)
@@ -343,7 +344,7 @@ void Order::getTotal()
         this->totalPayment += copyQueue.front().price;
         copyQueue.pop();
     }
-    this->totalPayment = this->totalPayment + (this->totalPayment * tax);
+    this->totalPayment = this->totalPayment + (this->totalPayment * TAX);
     //cout << this->totalPayment << endl;
     //return totalPayment;
 }

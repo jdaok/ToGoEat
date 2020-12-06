@@ -36,18 +36,18 @@ struct ServiceEvent
 
 struct ServerInfo
 {
-    Order order;
+    Order order;  
     bool status;
 };
 
 //for comparing ServiceEvent in PriorityQueue template
 bool operator<(const ServiceEvent& a, const ServiceEvent& b)
 {
-    //swith to lo-to-hi priority
+    //swith to lo-to-hi priority 
     return b.serviceEndTime < a.serviceEndTime;
 }
 
-const int W1 = 23;   //cout width. W1 for title
+const int W1 = 23;   //cout width. W1 for title 
 const string CONFIG_FILE_NAME = "simulation.txt";
 
 //void outputProgrammerInfo();
@@ -75,7 +75,7 @@ int main()
     }
     outputTitle(config);
 
-    Queue<Order> waitLine;
+    Queue<Order> waitLine;   
     PriorityQueue<ServiceEvent> eventQueue;
     DynamicArray<ServerInfo> servers;
 
@@ -95,7 +95,7 @@ int main()
         Manager manager;
         manager.managerLoop();
     }
-
+    
     if (mode == 1)
     {
         int orderCount = 0;
@@ -108,7 +108,7 @@ int main()
                 servers[eventQueue.top().serverNum].status = false;
                 eventQueue.pop();
             }
-
+            
             //handle new arrivals
             string temp = pauseForUserEnter();
             //user type order
@@ -120,12 +120,12 @@ int main()
                 {
                     waitLine.push(tempOrder);
                 }
-                cin.ignore();
+                //cin.ignore();
 
                 orderCount++;
                 totalPrice += tempOrder.getTotalPayment();
             }
-
+       
             // for idle servers, move Order from wait queue and begin service for each server
             for (int i = 0; i < config.chefNumber; i++)
             {
@@ -155,7 +155,7 @@ int main()
         }
 
         //output the total numer of the order and total amount of money the restaurant made.
-        cout << "Today took " << orderCount << " orders and made $"
+        cout << "Today took " << orderCount << " order and made $" 
             << fixed << setprecision(2) << totalPrice << endl;
         cout << endl << "Done!" << endl;
     }
@@ -168,7 +168,7 @@ int main()
 
 //*****************
 //Function name: loadSimulationConfig
-//Purpose: process Simulation Config file
+//Purpose: process Simulation Config file 
 //fileName: Config file name
 //config: config data(input & output)
 //Returns: True-succed False-fail
@@ -191,7 +191,7 @@ bool loadSimulationConfig(string fileName, simulationConfig& config)
             ret = false;
         }
 
-
+   
         getline(fin, line);
         config.maxLenWaitQue = atoi(line.c_str());
         if (config.maxLenWaitQue < 1)
@@ -200,7 +200,7 @@ bool loadSimulationConfig(string fileName, simulationConfig& config)
             ret = false;
         }
 
-
+   
         getline(fin, line);
         config.timeAtNewArrStop = atoi(line.c_str());
         if (config.timeAtNewArrStop < 0)
@@ -267,7 +267,7 @@ void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfi
     string splitSign(title1Len + title2Len + title3Len + 2 + title4Len + 2, '-');
     cout << splitSign << endl;
 
-    cout << title1 << setw(row2Wide) << title2 << setw(row3Wide) << title3 << setw(row4Wide) << title4
+    cout << title1 << setw(row2Wide) << title2 << setw(row3Wide) << title3 << setw(row4Wide) << title4 
         << endl;
     cout << string(title1Len, '-') << setw(row2Wide) << string(title2Len, '-')
         << setw(row3Wide) << string(title3Len, '-') << setw(row4Wide) << string(title4Len, '-') << endl;
@@ -330,12 +330,12 @@ string pauseForUserEnter()
     string input;
     while (true)
     {
-        cout << "Press M to make a order. Press I to ignore: ";
+        cout << "Press M to make a order. Press I to ignore ...";
         getline(cin,input);
         if (input == "M" || input == "m" || input == "I" || input == "i")
             break;
         else
-            cout << "Invalid input, please type M or I!" << endl<< endl;
+            cout << "Wrong input, please type M or I" << endl;
     }
 
     return input;
@@ -368,9 +368,11 @@ int askMode() //Ask for Customer or Manager
             break;
         default:
             cout << endl;
-            cout << "Invalid input, try again.";
+            cout << "Invalid input, try again." << endl;
         }
     }
 
     return returnValue;
 }
+
+
