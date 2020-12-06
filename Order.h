@@ -1,173 +1,327 @@
-#ifndef MANAGER_H
-#define MANAGER_H
+
+//
+//  Created by Max Raffield on 12/3/20.
+//
+
+#ifndef Order_h
+#define Order_h
 
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
-
 #include <string>
+#include <cstdlib>
+#include <map>
+#include <queue>
+#include <vector>
+#include <fstream>
 #include <cstring>
 
-#include "Restaurant.h"
 #include "common.h"
+//#include "restaurant.h"
+//#include "Manager.h"
+
 using namespace std;
 
-class Manager
+class Order
 {
 public:
-    vector<MenuItem> localMenu;
-    Manager();
-    int managerLoop();
-    void uploadMenuTXT();
+    string name;
+    int orderID;
+    int status; //1 = Ordering, 2 = Cooking, 3 = Finished
+    queue<MenuItem> items;
+    double totalPayment;
+
+    Order(); //Default Constructor
+    void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
+    //todo let user type the order
+    bool makeOrder(const vector<MenuItem> &menu);
+    //todo
+
+    int generateID();
+
+    //Item Functions
+    void addItem(int, vector<MenuItem> menu);
+    void deleteItems();
+    void getTotal();
+    int getServiceTime();
+
+    //Status Functions
+    void setStatus(int);
+    string reportStatus();
+    void getSummary();
+    void printOrder();
+
+    //Paying Functions
+    bool pay();
+    //void finishOrder();
+
 };
 
-Manager::Manager() //Default Constructor
+Order::Order() //Default Constructor
 {
-    string input;
 
-    cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
-    getline(cin, input);
-    //cin.ignore(1000,10);
-
-    cout<<"The restaurant name was set to " << input<<"." <<endl;
-
-    // restaurant.name = input;
-    // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl
-    if (MENU.empty()) loadMenu(MENU); // in case menu wasn't loaded
-    localMenu = MENU;
-    showLocalMenu(localMenu);
+    orderID = generateID();
+    status = 1;
+    totalPayment = 0;
+    for(unsigned int i = 0; i < items.size(); i++)
+    {
+      items.pop();
+    }
+    //todo remark this one. we let user input the menu
+    //createOrderItems(menu);
 }
 
-void Manager::uploadMenuTXT() // upload vector menu to textfile
+void Order::printOrder()
 {
-    ofstream outfile("menu.txt", ios_base::out|ios_base::trunc); // overwrite file
-
-    outfile<<"-name"<<"\t"<<"price"<<"\t"<<"avgPrepTime"<<endl;
-
-    for(unsigned int i=0; i< localMenu.size(); i++)
+    queue<MenuItem> itemsCopy = items;
+    while(itemsCopy.empty() == false)
     {
-        outfile<<localMenu[i].name<<"\t"<<localMenu[i].price<<"\t"<<localMenu[i].avgPrepTime<<"\t"<<endl;
+        cout<< itemsCopy.front().name<<endl;
+        itemsCopy.pop();
     }
 
-    outfile.close();
+    getTotal();
 
+    cout<<"----- Total $: " << totalPayment <<endl;
 }
 
-int Manager::managerLoop()
+int Order::generateID() //Generates Random ID
 {
-    string buf2;
-    int selection;
-    bool inLoop = true;
+    srand((unsigned)time(NULL));
+    int ID = rand() % 899999 + 100000;
+    return ID;
+}
 
-    while (inLoop)
+//todo let user type the order
+bool Order::makeOrder(const vector<MenuItem>& menu)
+{
+    //Create New Order
+    //Order newOrder;
+
+    cout << "Displaying Menu:" << endl;
+    cout << endl;
+    showMenu(menu);
+
+    //Ask Name
+    cout << endl;
+    cout << "Enter Customer Name: " << endl;
+    string customerName;
+    getline(cin, customerName);
+    name = customerName;
+
+    string buf;
+    char selection;
+    bool next = false;
+    do
     {
-        cout<<endl<<"Pick an action:"<<endl;
-        cout<<"[0] Exit"<<endl;
-        cout<<"[1] Add Item"<<endl;
-        cout<<"[2] Remove Item"<<endl;
-        cout<<"[3] Print Current Menu      ";
-
-        cin >> buf2;
+      cout << "Select an option: " << endl;;
+      cout << "[1 = Add Item, 2 = Clear Items, 3 = Print Order, 4 = Finish, 5 = Cancel]" << endl;;
+        cout << endl;
+        cin >> selection;
         cin.ignore();
-
-        try
-        {
-            selection = stoi(buf2);
-        }
-        catch(exception &err)
-        {
-            selection = 4; // error handling => selection = default switch
-        }
-        cout<<endl;
 
         switch (selection)
         {
-        case 0:                     // break
-        {
-            uploadMenuTXT();
-            MENU = localMenu;
-            inLoop = false;
-            break;
-        }
-        case 1:                     // add item
-        {
-            string userInput;         // get user input
-            MenuItem tempItem;
-            cout<<"Ok. What is the item name?  "<<endl;
-            cin >> buf2;
-            cin.ignore(1000,10);
-            tempItem.name = buf2;
-
-            cout<<"Ok. How much does "<< tempItem.name<<" cost? (dollars)  "<<endl;
-            cin >> buf2;
-            cin.ignore(1000,10);
-            try
-            {
-                tempItem.price = stod(buf2);
-            }
-            catch(exception &err)
-            {
-                cout << "Please try again and  enter a valid double.  "<<endl;
-                break;
-            }
-
-            cout<<"Ok. How many minutes will "<< tempItem.name<<" take to prepare?  "<<endl;
-            cin >> buf2;
-            cin.ignore(1000,10);
-            try
-            {
-                tempItem.avgPrepTime = stoi(buf2);
-            }
-            catch(exception &err)
-            {
-                cout << "Please try again and enter a valid integer.  "<<endl;
-                break;
-            }
-
-            tempItem.idNumber = 999; // temp ID number.
-
-            localMenu.push_back(tempItem); // add the item to the menu
-            showLocalMenu(localMenu);
-            cout<<endl<<"                        "<<tempItem.name<<" was added to the menu."<<endl;
-            break;
-
-        }
-        case 2:
-        {
-            showLocalMenu(localMenu);
-            string deleteID;
-            cout<<"Ok. Enter the ID to delete.";
-            cin>>deleteID;
+        case '1':
+            int itemID;
+            cout << "Add a food with the ID: " << endl;
+            cin >> buf;
+            cin.ignore(1000, 10);
 
             try
             {
-                if (stoi(deleteID)<0 || stoi(deleteID) >= localMenu.size())
-                {
-                    cout<<"Please try again and enter a valid integer."<<endl;
-                    break;
-                }
+              itemID = stoi(buf.c_str());
+              addItem(itemID, menu);
             }
             catch(exception &err)
             {
-                cout << "Please try again and enter a valid integer."<<endl;
-                break;
+              cout << endl;
+              cout << "Please enter a valid input." << endl;
+              cout << endl;
+              break;
             }
-
-            string deleteName = localMenu[stoi(deleteID)].name;
-            localMenu.erase (localMenu.begin()+stoi(deleteID));
-            cout<<endl<<"                        "<<deleteName<<" was deleted."<<endl;
             break;
-        }
-        case 3:    // show menu
-        {
-            showLocalMenu(localMenu);
+        case '2':
+            cout << endl;
+            cout << "Items Cleared." << endl;
+            deleteItems();
+            cout << endl;
             break;
-        }
+        case '3':
+            cout << endl;
+            cout << "Order Details: " << endl;
+            printOrder();
+            break;
+        case '4':
+            //finish the order
+            //finishOrder();
+            next = true;
+            break;
+        case '5':
+            next = true;
+            break;
         default:
-            cout<< " Incorrect menu ID.. retry!" << endl;
+            cout << "Please enter a valid input." << endl;
+            cout << endl;
+            cin.ignore(1000, 10);
+            //selection = 0;
+            break;
+        }
+
+    } while (!next);
+
+    //customer finish the order
+    if (selection == '4')
+    {
+        //now need to let customer pay the money
+        //inside the pay function show the price and let
+        bool ret = pay();
+        if (!ret)
+        {
+            //todo cancel the payment, need to delete the items
+            //deleteItems();
+          deleteItems();
+        }
+        return ret;
+    }
+    else if (selection == '5')  //customer cancel the order
+    {
+        //todo cancel the payment, need to delete the items
+            //deleteItems();
+        deleteItems();
+        return false;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+//todo
+bool Order::pay()
+{
+    //show the items and their price, the tax(sum of items price*defalut tax rate), total price
+    //let user type to pay
+    int input = 0;
+    while (true)
+    {
+      getTotal();
+      cout << "The total is: " << totalPayment << endl;
+        cout << "[1 = Pay, -1 = Cancel]" << endl;
+        cin >> input;
+        if (input == 1)
+        {
+          if(totalPayment == 0)
+          {
+            cout << endl;
+            cout << "Total is 0, cancelling order." << endl;
+            cout << endl;
+            return false;
+          }
+          else
+          {
+            cout << endl;
+            cout << "Thank you!" << endl;
+            cout << endl;
+            cout << "Order Details: " << endl;
+            printOrder();
+            return true;
+          }
+        }
+        else if (input == -1)
+        {
+            cout << endl;
+            cout << "Order has been cancelled." << endl;
+            return false;
+        }
+        else
+        {
+            cout << "Incorrect number. Please Re-enter." << endl;
+        }
+    }
+
+}
+
+void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
+{
+
+    MenuItem tempItem;
+    for(auto& it: menu)
+    {
+        if(it.idNumber == idNum)
+        {
+
+            tempItem.name = it.name;
+            tempItem.idNumber = it.idNumber;
+            tempItem.price = it.price;
+            tempItem.avgPrepTime = it.avgPrepTime;
+            //tempItem.amount = amount;
+            //items.insert(pair<MenuItem, int>(tempItem, amount));
+            items.push(tempItem);
             break;
         }
     }
 }
 
-#endif
+void Order::deleteItems()
+{
+  for(unsigned int i = 0; i < items.size(); i++)
+  {
+        items.pop();
+  }
+}
+
+int Order::getServiceTime()
+{
+  int returnValue = 0;
+  queue<MenuItem> copyQueue;
+  copyQueue = items;
+  for(unsigned int i = 0; i < items.size(); i++)
+  {
+    returnValue += copyQueue.front().avgPrepTime;
+    copyQueue.pop();
+  }
+  return returnValue;
+}
+
+void Order::getTotal()
+{
+  totalPayment = 0;
+  double tax = .10;
+  queue<MenuItem> copyQueue;
+  copyQueue = items;
+  for(unsigned int i = 0; i < items.size(); i++)
+  {
+    this->totalPayment += copyQueue.front().price;
+    copyQueue.pop();
+  }
+  this->totalPayment = this->totalPayment + (this->totalPayment * tax);
+  //cout << this->totalPayment << endl;
+  //return totalPayment;
+}
+
+void Order::setStatus(int setValue) //Set Value of Status
+{
+    status = setValue;
+}
+
+string Order::reportStatus() //Returns Order Status
+{
+    string returnValue = "";
+    switch(this->status)
+    {
+    case 1:
+        returnValue = "Status: Currently Ordering";
+        break;
+    case 2:
+        returnValue = "Status: Cooking";
+        break;
+    case 3:
+        returnValue = "Status: Order Finished";
+        break;
+    default:
+        returnValue = "No Status";
+    }
+  return returnValue;
+}
+
+#endif /* Order_h */
