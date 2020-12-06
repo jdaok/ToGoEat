@@ -28,8 +28,8 @@ Manager::Manager() //Default Constructor
     cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
     getline(cin, input);
     cin.ignore(1000,10);
-                                                                                                       // restaurant.name = input;
-                                                                                                       // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl
+    // restaurant.name = input;
+    // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl
     if (MENU.empty()) loadMenu(MENU); // in case menu wasn't loaded
     localMenu = MENU;
     showLocalMenu(localMenu);
@@ -69,8 +69,15 @@ int Manager::managerLoop()
 
         cin >> buf2;
         cin.ignore(1000,10);
-        selection = stoi(buf2);
 
+        try
+        {
+            selection = stoi(buf2);
+        }
+        catch(exception &err)
+        {
+            selection = 4; // error handling => selection = default switch
+        }
         cout<<endl;
 
         switch (selection)
@@ -86,26 +93,42 @@ int Manager::managerLoop()
         {
             string userInput;         // get user input
             MenuItem tempItem;
-            cout<<"Ok. What is the item name?"<<endl;
+            cout<<"Ok. What is the item name?  "<<endl;
             cin >> buf2;
             cin.ignore(1000,10);
             tempItem.name = buf2;
 
-            cout<<"Ok. How much does "<< tempItem.name<<" cost? (dollars)"<<endl;
+            cout<<"Ok. How much does "<< tempItem.name<<" cost? (dollars)  "<<endl;
             cin >> buf2;
             cin.ignore(1000,10);
-            tempItem.price = stod(buf2);
+            try
+            {
+                tempItem.price = stod(buf2);
+            }
+            catch(exception &err)
+            {
+                cout << "Please try again and  enter a valid double.  "<<endl;
+                break;
+            }
 
-            cout<<"Ok. How many minutes will "<< tempItem.name<<" take to prepare?"<<endl;
+            cout<<"Ok. How many minutes will "<< tempItem.name<<" take to prepare?  "<<endl;
             cin >> buf2;
             cin.ignore(1000,10);
-            tempItem.avgPrepTime = stoi(buf2);
+            try
+            {
+                tempItem.avgPrepTime = stoi(buf2);
+            }
+            catch(exception &err)
+            {
+                cout << "Please try again and enter a valid integer.  "<<endl;
+                break;
+            }
 
             tempItem.idNumber = 999; // temp ID number.
 
             localMenu.push_back(tempItem); // add the item to the menu
             showLocalMenu(localMenu);
-            cout<<endl<<"                        "<<tempItem.name<<" was added."<<endl;
+            cout<<endl<<"                        "<<tempItem.name<<" was added to the menu."<<endl;
             break;
 
         }
@@ -116,11 +139,22 @@ int Manager::managerLoop()
             cout<<"Ok. Enter the ID to delete.";
             cin>>deleteID;
 
-            if (stoi(deleteID)<0 || stoi(deleteID) >= localMenu.size())
+            try
             {
-                cout<<"INVALID ID. Try again."<<endl;
+                int deleteIDint = stoi(deleteID);
+            }
+            catch(exception &err)
+            {
+                cout << "Please try again and enter a valid integer."<<endl;
                 break;
             }
+
+            if (stoi(deleteID)<0 || stoi(deleteID) >= localMenu.size())
+            {
+                cout<<"Please try again and enter a valid integer."<<endl;
+                break;
+            }
+
             string deleteName = localMenu[stoi(deleteID)].name;
             localMenu.erase (localMenu.begin()+stoi(deleteID));
             cout<<endl<<"                        "<<deleteName<<" was deleted."<<endl;
@@ -132,7 +166,7 @@ int Manager::managerLoop()
             break;
         }
         default:
-            cout<< " Incorrect menu ID.. retry!";
+            cout<< " Incorrect menu ID.. retry!" << endl;
             break;
         }
     }
