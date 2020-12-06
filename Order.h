@@ -53,7 +53,6 @@ public:
 
     //Paying Functions
     bool pay();
-    //void finishOrder();
 
     int getID() const  { return orderID; }
     string getCustomerName() { return customerName; }
@@ -159,7 +158,6 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             break;
         case '4':
             //finish the order
-            //finishOrder();
             next = true;
             break;
         case '5':
@@ -352,11 +350,5 @@ string Order::reportStatus() //Returns Order Status
     }
     return returnValue;
 }
-
-/*void Order::finishOrder()
-{
-
-}*/
-
 
 #endif /* Order_h */
