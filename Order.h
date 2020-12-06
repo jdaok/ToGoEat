@@ -108,6 +108,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     getline(cin, customerName);
     name = customerName;
    
+    string buf;
     char selection;
     bool next = false;
     do
@@ -122,12 +123,21 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
         {
         case '1':
             int itemID;
-            cout << "Add a food with the ID" << endl;
-            cin >> itemID;
+            cout << "Add a food with the ID: " << endl;
+            cin >> buf;
             cin.ignore(1000, 10);
-            if(itemID <= menu.size() && itemID > -1)
+            
+            try
             {
+              itemID = stoi(buf.c_str());
               addItem(itemID, menu);
+            }
+            catch(exception &err)
+            {
+              cout << endl;
+              cout << "Please enter a valid input." << endl;
+              cout << endl;
+              break;
             }
             break;
         case '2':
@@ -150,7 +160,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             next = true;
             break;
         default:
-            cout << "Incorrect menu ID, please enter a correct one." << endl;
+            cout << "Please enter a valid input." << endl;
             cout << endl;
             cin.ignore(1000, 10);
             //selection = 0;
