@@ -1,4 +1,4 @@
-//
+
 //  Created by Max Raffield on 12/3/20.
 //
 
@@ -14,7 +14,6 @@
 #include <cstring>
 
 #include "common.h"
-
 
 using namespace std;
 
@@ -202,7 +201,6 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             cin.ignore(1000, 10);
             break;
         }
-
     }
     while (!next);
 
@@ -373,6 +371,5 @@ string Order::reportStatus() //Returns Order Status
     }
     return returnValue;
 }
-
 
 #endif /* Order_h */
