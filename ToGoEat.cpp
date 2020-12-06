@@ -20,12 +20,6 @@ using namespace std;
 #include "Order.h"
 #include "Manager.h"
 
-struct simulationConfig
-{
-    int chefNumber; //the number of chefs
-    int timeAtNewArrStop; //the clock time at which new arrivals stop, in minutes(> 0, whole number)
-    int maxLenWaitQue; //the maximum length of the wait queue(1 or more, whole number)
-};
 
 
 struct ServiceEvent
@@ -36,18 +30,18 @@ struct ServiceEvent
 
 struct ServerInfo
 {
-    Order order;  
+    Order order;
     bool status;
 };
 
 //for comparing ServiceEvent in PriorityQueue template
 bool operator<(const ServiceEvent& a, const ServiceEvent& b)
 {
-    //swith to lo-to-hi priority 
+    //swith to lo-to-hi priority
     return b.serviceEndTime < a.serviceEndTime;
 }
 
-const int W1 = 23;   //cout width. W1 for title 
+const int W1 = 23;   //cout width. W1 for title
 const string CONFIG_FILE_NAME = "simulation.txt";
 
 //void outputProgrammerInfo();
@@ -55,10 +49,10 @@ bool loadSimulationConfig(string fileName, simulationConfig& config);
 void outputTitle(simulationConfig config);
 
 bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulationConfig& config,
-    const DynamicArray<ServerInfo>& servers);
+                         const DynamicArray<ServerInfo>& servers);
 void outputServiceEndingTime(const PriorityQueue<ServiceEvent>& eventQueue);
 void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfig& config,
-    const DynamicArray<ServerInfo>& servers);
+                   const DynamicArray<ServerInfo>& servers);
 
 
 string pauseForUserEnter();
@@ -69,13 +63,13 @@ int main()
     simulationConfig config;  //simulation config data
     if (!loadSimulationConfig(CONFIG_FILE_NAME, config))
     {
-        cout << "Load the config file Error:" << CONFIG_FILE_NAME <<
-            ". Please check and rerun the program" << endl;
+        cout << "Error loading file: " << CONFIG_FILE_NAME <<
+             ". Please check and rerun the program." << endl;
         return 1;
     }
     outputTitle(config);
 
-    Queue<Order> waitLine;   
+    Queue<Order> waitLine;
     PriorityQueue<ServiceEvent> eventQueue;
     DynamicArray<ServerInfo> servers;
 
@@ -87,18 +81,21 @@ int main()
 
     //loadMenu
     loadMenu(MENU);
+    Manager manager(true, config);
+
 
     //Manager side
     if (mode == 2)
     {
-        Manager manager;
-        manager.managerLoop();
+        manager.managerLoop(config);
+        mode = 1;
     }
-    
+
     if (mode == 1)
     {
+        cout<<"You are now the customer!"<<endl;
         int orderCount = 0;
-        double totalPrice = 0;
+        double dailyRevenue = 0;
         for (int time = 0;; time++)
         {
             //handle all services scheduled
@@ -107,7 +104,7 @@ int main()
                 servers[eventQueue.top().serverNum].status = false;
                 eventQueue.pop();
             }
-            
+
             //handle new arrivals
             string temp = pauseForUserEnter();
             //user type order
@@ -121,9 +118,9 @@ int main()
                 }
 
                 orderCount++;
-                totalPrice += tempOrder.getTotalPayment();
+                dailyRevenue += tempOrder.getTotalPayment();
             }
-       
+
             // for idle servers, move Order from wait queue and begin service for each server
             for (int i = 0; i < config.chefNumber; i++)
             {
@@ -152,10 +149,15 @@ int main()
 
         }
 
+        config.totalRevenue += dailyRevenue; // calculate new total revenue
+        manager.updateConfigSimulation(config);
+
         //output the total numer of the order and total amount of money the restaurant made.
-        cout << "Today took " << orderCount << " order and made $" 
-            << fixed << setprecision(2) << totalPrice << endl;
-        cout << endl << "Done!" << endl;
+
+        cout << "Busy day! Today, "<<config.restaurantName<<" took " << orderCount << " orders."<<endl<<config.restaurantName<<" made "
+             << fixed << setprecision(2) << dailyRevenue <<"$!"<< endl << "Total revenue: " << config.totalRevenue <<".";
+        cout << endl << endl << "Done!" << endl;
+
     }
 
     return 0;
@@ -166,7 +168,7 @@ int main()
 
 //*****************
 //Function name: loadSimulationConfig
-//Purpose: process Simulation Config file 
+//Purpose: process Simulation Config file
 //fileName: Config file name
 //config: config data(input & output)
 //Returns: True-succed False-fail
@@ -175,45 +177,74 @@ int main()
 bool loadSimulationConfig(string fileName, simulationConfig& config)
 {
     bool ret = true;
+    char buf[1000];
 
     ifstream fin;
     fin.open(fileName);
+    if (!fin.good())
+    {
+        cout << "Error opening simulation.txt." << endl;
+        return false;
+    }
+
+    bool setName = false;
+
     if (fin.good())
     {
+
         string line;
         getline(fin, line);
-        config.chefNumber = atoi(line.c_str());
+        strcpy(buf, line.c_str());
+        if (buf[0] == 0)  // prompt to set name if first line is empty
+        {
+            setName = true;
+        }
+        else{config.restaurantName = buf;}
+
+        getline(fin, line);
+        strcpy(buf, line.c_str());
+        config.chefNumber = stoi(buf);
         if (config.chefNumber < 1)
         {
-            cout << "Config Error:the number of servers need to be 1 or more." << endl;
+            cout << "Config Error: the number of servers need to be 1 or more." << endl;
             ret = false;
         }
 
-   
         getline(fin, line);
-        config.maxLenWaitQue = atoi(line.c_str());
+        strcpy(buf, line.c_str());
+        config.maxLenWaitQue = stoi(buf);
         if (config.maxLenWaitQue < 1)
         {
-            cout << "Config Error:the maximum length of the wait queue need to be 1 or more." << endl;
+            cout << "Config Error: the maximum length of the wait queue need to be 1 or more." << endl;
             ret = false;
         }
 
-   
         getline(fin, line);
-        config.timeAtNewArrStop = atoi(line.c_str());
+        strcpy(buf, line.c_str());
+        config.timeAtNewArrStop = stoi(buf);
         if (config.timeAtNewArrStop < 0)
         {
-            cout << "Config Error:the clock time at which new arrivals stop, in minutes needs to > 0" << endl;
+            cout << "Config Error: the clock time at which new arrivals stop, in minutes needs to > 0" << endl;
             ret = false;
         }
+
+        getline(fin, line);
+        strcpy(buf, line.c_str());
+        config.totalRevenue = stod(buf);
+        if (config.timeAtNewArrStop < 0)
+        {
+            cout << "Config Error: the total revenue should be positive." << endl;
+            ret = false;
+        }
+
+        if (setName) // set name if it needs to be set by passing false parameter
+        {
+            Manager manager(false, config);
+        }
+
 
         fin.close(); // done with the file
         return ret;
-    }
-    else
-    {
-        cout << "Error, can not read the config file:" << fileName << endl;
-        return false;
     }
 }
 
@@ -227,16 +258,17 @@ bool loadSimulationConfig(string fileName, simulationConfig& config)
 //*****************
 void outputTitle(simulationConfig config)
 {
-    cout << "********Welcome to the ToGoEat********" << endl;
-    cout << setw(W1) << left << "number of chef:" << config.chefNumber << endl;
-    cout << setw(W1) << left << "The time to stop the new order: " << setw(3) << config.timeAtNewArrStop << endl;
-    cout << setw(W1) << left << "maximum queue length:" << config.maxLenWaitQue << endl << endl;
+    cout << "******** Welcome to "<< config.restaurantName <<"! ********" << endl;
+    cout << setw(W1) << left << "Chefs at work:" << config.chefNumber << endl;
+    cout << setw(W1) << left << "Closing time: " << setw(3) << config.timeAtNewArrStop << endl;
+    cout << setw(W1) << left << "Orde aitlist size: " << config.maxLenWaitQue << endl;
+    cout << setw(W1) << left << "Total revenue: " << config.totalRevenue << endl << endl;
 }
 
 
 
 bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulationConfig& config,
-    const DynamicArray<ServerInfo>& servers)
+                         const DynamicArray<ServerInfo>& servers)
 {
     bool end = false;
     if (waitLine.empty() && time >= config.timeAtNewArrStop)
@@ -254,21 +286,21 @@ bool shouldEndSimulation(int time, const Queue<Order>& waitLine, const simulatio
 }
 
 void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfig& config,
-    const DynamicArray<ServerInfo>& servers)
+                   const DynamicArray<ServerInfo>& servers)
 {
     cout << left << setw(6) << "Time:" << time << right << endl;
     string title1 = "chef  ", title2 = "now serving", title3 = "customer Name   ", title4 = "wait queue";
     int title1Len = title1.length(), title2Len = title2.length(), title3Len = title3.length()
-        , title4Len = title4.length();
+                    , title4Len = title4.length();
     int row2Wide = title2Len + 2, row3Wide = title3Len + 2, row4Wide = title4Len + 2;;
 
     string splitSign(title1Len + title2Len + title3Len + 2 + title4Len + 2, '-');
     cout << splitSign << endl;
 
-    cout << title1 << setw(row2Wide) << title2 << setw(row3Wide) << title3 << setw(row4Wide) << title4 
-        << endl;
+    cout << title1 << setw(row2Wide) << title2 << setw(row3Wide) << title3 << setw(row4Wide) << title4
+         << endl;
     cout << string(title1Len, '-') << setw(row2Wide) << string(title2Len, '-')
-        << setw(row3Wide) << string(title3Len, '-') << setw(row4Wide) << string(title4Len, '-') << endl;
+         << setw(row3Wide) << string(title3Len, '-') << setw(row4Wide) << string(title4Len, '-') << endl;
 
     for (int i = 0; i < config.chefNumber; i++)
     {
@@ -309,8 +341,8 @@ void outputServiceEndingTime(const PriorityQueue<ServiceEvent>& eventQueue)
     }
 
     if (!eventQueue.empty())
-        cout << endl << "Next end-of-service event in "
-        << eventQueue.top().serviceEndTime << " minutes" << endl << endl;
+        cout << endl << "Next end-of-service event at "
+             << eventQueue.top().serviceEndTime << ". " << endl << endl;
     else
         cout << endl << "No scheduled end-of-service events at this time" << endl << endl;
 }
@@ -372,5 +404,3 @@ int askMode() //Ask for Customer or Manager
 
     return returnValue;
 }
-
-
