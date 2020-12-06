@@ -12,7 +12,6 @@ using namespace std;
 
 #include <cmath>
 #include <cstdlib>
-#include <ctime> // for clock( ), clock_t, time, and CLOCKS_PER_SEC
 
 #include "PriorityQueue.h"
 #include "DynamicArray.h"
@@ -62,15 +61,11 @@ void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfi
     const DynamicArray<ServerInfo>& servers);
 
 
-void pauseForUserEnter();
+string pauseForUserEnter();
 int askMode();
 
 int main()
 {
-    //for rand() only call once. using static_cast to fix the warning that data type conversion may lose data. 
-    //srand(static_cast<unsigned int>(time(0))); rand();
-    //outputProgrammerInfo();
-
     simulationConfig config;  //simulation config data
     if (!loadSimulationConfig(CONFIG_FILE_NAME, config))
     {
@@ -100,24 +95,24 @@ int main()
         Manager manager;
         manager.managerLoop();
     }
-    else if (mode == 1)
+    
+    if (mode == 1)
     {
+        int orderCount = 0;
+        double totalPrice = 0;
         for (int time = 0;; time++)
         {
             //handle all services scheduled
-            //while (!eventQueue.empty() && eventQueue.top().serviceEndTime == time)
             while (!eventQueue.empty() && eventQueue.top().serviceEndTime <= time)
             {
                 servers[eventQueue.top().serverNum].status = false;
                 eventQueue.pop();
             }
+            
             //handle new arrivals
-            //pause for the user to press ENTER
-            pauseForUserEnter();
-
-            //Todo notice user to chose the food and make order
-            //change the random order to user type order
-            if (waitLine.size() < config.maxLenWaitQue)
+            string temp = pauseForUserEnter();
+            //user type order
+            if ((waitLine.size() < config.maxLenWaitQue) && (temp == "M" || temp == "m"))
             {
                 Order tempOrder;
                 bool ret = tempOrder.makeOrder(MENU);
@@ -125,6 +120,10 @@ int main()
                 {
                     waitLine.push(tempOrder);
                 }
+                cin.ignore();
+
+                orderCount++;
+                totalPrice += tempOrder.getTotalPayment();
             }
        
             // for idle servers, move Order from wait queue and begin service for each server
@@ -132,7 +131,6 @@ int main()
             {
                 if (!servers[i].status && !waitLine.empty())
                 {
-                    //TODO here is the order
                     servers[i].order = waitLine.front();
                     servers[i].status = true;
 
@@ -149,7 +147,6 @@ int main()
             }
 
             outputSummary(time, waitLine, config, servers);
-            //TODO maybe don't need this
             outputServiceEndingTime(eventQueue);
 
             if (shouldEndSimulation(time, waitLine, config, servers))
@@ -158,7 +155,7 @@ int main()
         }
 
         //TODO output the total numer of the order and total amount of money the restaurant made.
-
+        cout << "Today took " << orderCount << " orders and made $" << totalPrice << endl;
         cout << endl << "Done!" << endl;
     }
 
@@ -280,16 +277,16 @@ void outputSummary(int time, const Queue<Order>& waitLine, const simulationConfi
         if (servers[i].status)
         {
             cout.width(row2Wide);
-            cout << servers[i].order.orderID;
+            cout << servers[i].order.getID();
             cout.width(row3Wide);
-            cout << servers[i].order.name;
+            cout << servers[i].order.getCustomerName();
             if (i == 0 && !waitLine.empty())
             {
                 cout << setw(row4Wide);
                 Queue<Order> temp = waitLine;
                 while (temp.size() != 0)
                 {
-                    cout << temp.front().orderID;
+                    cout << temp.front().getID();
                     temp.pop();
                 }
             }
@@ -324,15 +321,25 @@ void outputServiceEndingTime(const PriorityQueue<ServiceEvent>& eventQueue)
 //*****************
 //Function name: pauseForUserEnter
 //Purpose: pause the program and wait for user enter
-//Returns: None
+//Returns: M - make a order. I - ignore
 //Return type: void
 //*****************
-void pauseForUserEnter()
+string pauseForUserEnter()
 {
-    cout << "Press ENTER to make a order..." << endl;
-    while (getchar() != '\n');
-    cout << endl;
+    string input;
+    while (true)
+    {
+        cout << "Press M to make a order. Press I to ignore ...";
+        getline(cin,input);
+        if (input == "M" || input == "m" || input == "I" || input == "i")
+            break;
+        else
+            cout << "Wrong input, please type M or I" << endl;
+    }
+
+    return input;
 }
+
 
 
 int askMode() //Ask for Customer or Manager

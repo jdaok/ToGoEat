@@ -1,4 +1,3 @@
-
 //
 //  Created by Max Raffield on 12/3/20.
 //
@@ -12,22 +11,20 @@
 #include <map>
 #include <queue>
 #include <vector>
-#include <fstream>
 #include <cstring>
 
 #include "common.h"
-//#include "restaurant.h"
-//#include "Manager.h"
+
 
 using namespace std;
 
 class Order
 {
-  string customerName;
-  int orderID;
-  double totalPayment;
-  queue<MenuItem> items;
-  
+    string customerName;
+    int orderID;
+    double totalPayment;
+    queue<MenuItem> items;
+
 public:
     //string customerName;
     //int orderID;
@@ -38,7 +35,7 @@ public:
     Order(); //Default Constructor
     void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
     //todo let user type the order
-    bool makeOrder(const vector<MenuItem> &menu);
+    bool makeOrder(const vector<MenuItem>& menu);
     //todo
 
     int generateID();
@@ -58,10 +55,10 @@ public:
     //Paying Functions
     bool pay();
     //void finishOrder();
-  
-    int getID(){return orderID;}
-    string getCustomerName(){return customerName;}
-    double getTotalPayment(){return totalPayment;}
+
+    int getID() const  { return orderID; }
+    string getCustomerName() { return customerName; }
+    double getTotalPayment() { return totalPayment; }
 
 };
 
@@ -71,9 +68,9 @@ Order::Order() //Default Constructor
     orderID = generateID();
     status = 1;
     totalPayment = 0;
-    for(int i = 0; i < items.size(); i++)
+    for (unsigned int i = 0; i < items.size(); i++)
     {
-      items.pop();
+        items.pop();
     }
     //todo remark this one. we let user input the menu
     //createOrderItems(menu);
@@ -82,15 +79,15 @@ Order::Order() //Default Constructor
 void Order::printOrder()
 {
     queue<MenuItem> itemsCopy = items;
-    while(itemsCopy.empty() == false)
+    while (itemsCopy.empty() == false)
     {
-        cout<< itemsCopy.front().name<<endl;
+        cout << itemsCopy.front().name << endl;
         itemsCopy.pop();
     }
-  
+
     getTotal();
 
-    cout<<"----- Total $: " << totalPayment <<endl;
+    cout << "----- Total $: " << totalPayment << endl;
 }
 
 int Order::generateID() //Generates Random ID
@@ -105,25 +102,25 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
 {
     //Create New Order
     //Order newOrder;
-  
+
     cout << "Displaying Menu:" << endl;
     cout << endl;
     showMenu(menu);
-  
+
     //Ask Name
     cout << endl;
     cout << "Enter Customer Name: " << endl;
     string nameInput;
     getline(cin, nameInput);
     customerName = nameInput;
-   
+
     string buf;
     char selection;
     bool next = false;
     do
     {
-      cout << "Select an option: " << endl;;
-      cout << "[1 = Add Item, 2 = Clear Items, 3 = Print Order, 4 = Finish, 5 = Cancel]" << endl;;
+        cout << "Select an option: " << endl;;
+        cout << "[1 = Add Item, 2 = Clear Items, 3 = Print Order, 4 = Finish, 5 = Cancel]" << endl;;
         cout << endl;
         cin >> selection;
         cin.ignore();
@@ -135,18 +132,21 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             cout << "Add a food with the ID: " << endl;
             cin >> buf;
             cin.ignore(1000, 10);
-            
+
             try
             {
-              itemID = stoi(buf.c_str());
-              addItem(itemID, menu);
+                itemID = stoi(buf.c_str());
+                if (itemID < 0 || itemID > (int)menu.size())
+                    cout << "wrong item ID" << endl;
+                else
+                    addItem(itemID, menu);
             }
-            catch(exception &err)
+            catch (exception& err)
             {
-              cout << endl;
-              cout << "Please enter a valid input." << endl;
-              cout << endl;
-              break;
+                cout << endl;
+                cout << "exception:" << err.what() << ". Please enter a valid input." << endl;
+                cout << endl;
+                break;
             }
             break;
         case '2':
@@ -175,7 +175,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             //selection = 0;
             break;
         }
-       
+
     } while (!next);
 
     //customer finish the order
@@ -188,7 +188,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
         {
             //todo cancel the payment, need to delete the items
             //deleteItems();
-          deleteItems();
+            deleteItems();
         }
         return ret;
     }
@@ -213,28 +213,28 @@ bool Order::pay()
     int input = 0;
     while (true)
     {
-      getTotal();
-      cout << "The total is: " << totalPayment << endl;
+        getTotal();
+        cout << "The total is: " << totalPayment << endl;
         cout << "[1 = Pay, -1 = Cancel]" << endl;
         cin >> input;
         if (input == 1)
         {
-          if(totalPayment == 0)
-          {
-            cout << endl;
-            cout << "Total is 0, cancelling order." << endl;
-            cout << endl;
-            return false;
-          }
-          else
-          {
-            cout << endl;
-            cout << "Thank you!" << endl;
-            cout << endl;
-            cout << "Order Details: " << endl;
-            printOrder();
-            return true;
-          }
+            if (totalPayment == 0)
+            {
+                cout << endl;
+                cout << "Total is 0, cancelling order." << endl;
+                cout << endl;
+                return false;
+            }
+            else
+            {
+                cout << endl;
+                cout << "Thank you!" << endl;
+                cout << endl;
+                cout << "Order Details: " << endl;
+                printOrder();
+                return true;
+            }
         }
         else if (input == -1)
         {
@@ -280,13 +280,13 @@ bool Order::pay()
 
 void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
 {
-    
+
     MenuItem tempItem;
-    for(auto& it: menu)
+    for (auto& it : menu)
     {
-        if(it.idNumber == idNum)
+        if (it.idNumber == idNum)
         {
-            
+
             tempItem.name = it.name;
             tempItem.idNumber = it.idNumber;
             tempItem.price = it.price;
@@ -301,39 +301,39 @@ void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
 
 void Order::deleteItems()
 {
-  for(int i = 0; i < items.size(); i++)
-  {
+    for (unsigned int i = 0; i < items.size(); i++)
+    {
         items.pop();
-  }
+    }
 }
 
 int Order::getServiceTime()
 {
-  int returnValue = 0;
-  queue<MenuItem> copyQueue;
-  copyQueue = items;
-  for(int i = 0; i < items.size(); i++)
-  {
-    returnValue += copyQueue.front().avgPrepTime;
-    copyQueue.pop();
-  }
-  return returnValue;
+    int returnValue = 0;
+    queue<MenuItem> copyQueue;
+    copyQueue = items;
+    for (unsigned int i = 0; i < items.size(); i++)
+    {
+        returnValue += copyQueue.front().avgPrepTime;
+        copyQueue.pop();
+    }
+    return returnValue;
 }
 
 void Order::getTotal()
 {
-  totalPayment = 0;
-  double tax = .10;
-  queue<MenuItem> copyQueue;
-  copyQueue = items;
-  for(int i = 0; i < items.size(); i++)
-  {
-    this->totalPayment += copyQueue.front().price;
-    copyQueue.pop();
-  }
-  this->totalPayment = this->totalPayment + (this->totalPayment * tax);
-  //cout << this->totalPayment << endl;
-  //return totalPayment;
+    totalPayment = 0;
+    double tax = .10;
+    queue<MenuItem> copyQueue;
+    copyQueue = items;
+    for (unsigned int i = 0; i < items.size(); i++)
+    {
+        this->totalPayment += copyQueue.front().price;
+        copyQueue.pop();
+    }
+    this->totalPayment = this->totalPayment + (this->totalPayment * tax);
+    //cout << this->totalPayment << endl;
+    //return totalPayment;
 }
 
 void Order::setStatus(int setValue) //Set Value of Status
@@ -344,7 +344,7 @@ void Order::setStatus(int setValue) //Set Value of Status
 string Order::reportStatus() //Returns Order Status
 {
     string returnValue = "";
-    switch(this->status)
+    switch (this->status)
     {
     case 1:
         returnValue = "Status: Currently Ordering";
@@ -358,12 +358,12 @@ string Order::reportStatus() //Returns Order Status
     default:
         returnValue = "No Status";
     }
-  return returnValue;
+    return returnValue;
 }
 
 /*void Order::finishOrder()
 {
-  
+
 }*/
 
 /*
