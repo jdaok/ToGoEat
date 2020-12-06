@@ -85,7 +85,6 @@ int main()
     cin.ignore();
     cout << endl;
 
-
     //loadMenu
     loadMenu(MENU);
 
@@ -120,7 +119,6 @@ int main()
                 {
                     waitLine.push(tempOrder);
                 }
-                //cin.ignore();
 
                 orderCount++;
                 totalPrice += tempOrder.getTotalPayment();
