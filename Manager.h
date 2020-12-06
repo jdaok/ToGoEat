@@ -1,4 +1,4 @@
-#ifndef MANAGER_H
+##ifndef MANAGER_H
 #define MANAGER_H
 
 #include <iostream>
@@ -9,7 +9,6 @@
 #include <ios>
 #include <cstring>
 
-#include "Restaurant.h"
 #include "common.h"
 
 using namespace std;
@@ -193,7 +192,7 @@ int Manager::managerLoop(simulationConfig& config)
             }
             else
             {
-                cout<<"Your total balance is " << fixed << setprecision(2) << config.totalRevenue <<"$."<<endl<<"A new chef will be 100$. Would you like to hire them?"<<endl;
+                cout<<"Your total balance is " << fixed << setprecision(2) << config.totalRevenue <<"$."<<endl<<"A new chef will be 100$. Would you like to purchase?"<<endl;
                 cout<<"[0] Purchase"<<endl;
                 cout<<"[1] Cancel    ";
 
