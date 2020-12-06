@@ -36,7 +36,7 @@ struct ServiceEvent
 
 struct ServerInfo
 {
-    Order order;  //TODO Order order
+    Order order;  
     bool status;
 };
 
@@ -75,7 +75,7 @@ int main()
     }
     outputTitle(config);
 
-    Queue<Order> waitLine;   //TODO Queue<Order> waitLine
+    Queue<Order> waitLine;   
     PriorityQueue<ServiceEvent> eventQueue;
     DynamicArray<ServerInfo> servers;
 

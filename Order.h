@@ -34,9 +34,8 @@ public:
 
     Order(); //Default Constructor
     void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
-    //todo let user type the order
+    //Let user type the order
     bool makeOrder(const vector<MenuItem>& menu);
-    //todo
 
     int generateID();
 
@@ -72,8 +71,6 @@ Order::Order() //Default Constructor
     {
         items.pop();
     }
-    //todo remark this one. we let user input the menu
-    //createOrderItems(menu);
 }
 
 void Order::printOrder()
@@ -97,7 +94,7 @@ int Order::generateID() //Generates Random ID
     return ID;
 }
 
-//todo let user type the order
+//let user type the order
 bool Order::makeOrder(const vector<MenuItem>& menu)
 {
     //Create New Order
@@ -186,16 +183,12 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
         bool ret = pay();
         if (!ret)
         {
-            //todo cancel the payment, need to delete the items
-            //deleteItems();
             deleteItems();
         }
         return ret;
     }
     else if (selection == '5')  //customer cancel the order
     {
-        //todo cancel the payment, need to delete the items
-            //deleteItems();
         deleteItems();
         return false;
     }
@@ -205,7 +198,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     }
 }
 
-//todo
+
 bool Order::pay()
 {
     //show the items and their price, the tax(sum of items price*defalut tax rate), total price
@@ -365,90 +358,5 @@ string Order::reportStatus() //Returns Order Status
 
 }*/
 
-/*
-vector<MenuItem> order::loadMenu() //Creates Menu to Read
-{
-    vector<MenuItem> returnMenu;
-    ifstream fin;
-    fin.open("menu.txt");
-    int itemID = 0;
-    char* token;
-    char buf[1000];
-    const char* const tab = "\t";
-    while(fin.good())
-    {
-        string line;
-        getline(fin, line);
-        strcpy(buf, line.c_str());
-        if (buf[0] == 0) continue; // skip blank lines
-        //parse the line
-        const string name(token = strtok(buf, tab));
-        if (name.find('-') != string::npos) continue; // skip first line which has a dash in it
-        const string price((token = strtok(0, tab)) ? token : "");
-        const string avgPrepTime((token = strtok(0, tab)) ? token : "");
-        const string maxAmt((token = strtok(0, tab)) ? token : "");
-        MenuItem tempItem;
-        tempItem.name = name;
-        tempItem.idNumber = itemID;
-        itemID++;
-        tempItem.price = stod(price);
-        tempItem.avgPrepTime = stoi(avgPrepTime);
-        returnMenu.push_back(tempItem);
-    }
-    return returnMenu;
-}
-void order::showMenu() //Reads Menu
-{
-    vector<MenuItem> menu = loadMenu();
-    for(auto& it: menu)
-    {
-        cout << "Item Name: " << it.name << endl;
-        cout << "Item ID: " << it.idNumber << endl;
-        cout << "Item Price: " << it.price << endl;
-    }
-}
-void order::addItem(int idNumber, int amount, vector<MenuItem> menu) //Adds Item to Order
-{
-    MenuItem tempItem;
-    //vector<MenuItem> menu = loadMenu();
-    for(auto& it: menu)
-    {
-        if(it.idNumber == idNumber)
-        {
-            tempItem.name = it.name;
-            tempItem.idNumber = it.idNumber;
-            tempItem.price = it.price;
-            //tempItem.amount = amount;
-            //items.insert(pair<MenuItem, int>(tempItem, amount));
-            for(int i = 0; i < amount; i++)
-            {
-                items.push(tempItem);
-            }
-            break;
-        }
-    }
-}
-void order::getSummary() //Returns Summary
-{
-    cout << endl;
-    cout << "Order #" << orderID << ": " << endl;
-    string status = reportStatus();
-    cout << "Status: " << status << endl;
-    cout << "Items: " << endl;
-    map<MenuItem, int>::iterator it;
-    for(it = items.begin(); it != items.end(); it++)
-    {
-      cout << it->first.idNumber << " " << it->first.name << " (" << it->second << ")" << endl;
-    }
-    queue<MenuItem> copyQueue;
-    copyQueue = items;
-    for(int i = 0; i < items.size(); i++)
-    {
-        cout << copyQueue.front().idNumber << " " << copyQueue.front().name << endl;
-        copyQueue.pop();
-    }
-    cout << endl;
-}
-*/
 
 #endif /* Order_h */
