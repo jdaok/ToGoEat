@@ -30,7 +30,7 @@ public:
     //int orderID;
     int status; //1 = Ordering, 2 = Cooking, 3 = Finished
     //queue<MenuItem> items;
-  //double totalPayment;
+    //double totalPayment;
 
     Order(); //Default Constructor
     void createOrderItems(vector<MenuItem> menu); //Creates Random Orders
@@ -54,9 +54,18 @@ public:
     //Paying Functions
     bool pay();
 
-    int getID() const  { return orderID; }
-    string getCustomerName() { return customerName; }
-    double getTotalPayment() { return totalPayment; }
+    int getID() const
+    {
+        return orderID;
+    }
+    string getCustomerName()
+    {
+        return customerName;
+    }
+    double getTotalPayment()
+    {
+        return totalPayment;
+    }
 
 };
 
@@ -77,7 +86,7 @@ void Order::printOrder()
     queue<MenuItem> itemsCopy = items;
     while (itemsCopy.empty() == false)
     {
-        cout << itemsCopy.front().name << endl;
+        cout << itemsCopy.front().name << "      " << fixed << setprecision(2) << itemsCopy.front().price <<"$" << endl;
         itemsCopy.pop();
     }
 
@@ -99,33 +108,47 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     //Create New Order
     //Order newOrder;
 
-    cout << "Displaying Menu:" << endl;
-    cout << endl;
-    showMenu(menu);
-
-    //Ask Name
-    cout << endl;
-    cout << "Enter Customer Name: " << endl;
+    cout << endl; //Ask Name
+    cout << "Okay, what is your name?  " << endl;
     string nameInput;
     getline(cin, nameInput);
     customerName = nameInput;
 
+    cout << "Hi, " << customerName<<"! Here's the menu:" << endl<< endl;
+    showMenu(menu);
+
     string buf;
-    char selection;
+    int selection;
+
     bool next = false;
     do
     {
-        cout << "Select an option: " << endl;;
-        cout << "[1 = Add Item, 2 = Clear Items, 3 = Print Order, 4 = Finish, 5 = Cancel]" << endl;;
-        cout << endl;
-        cin >> selection;
+        cout<<endl<<"Select an option:"<<endl;
+        cout<<"[1] Add Item to Order"<<endl;
+        cout<<"[2] Clear all Items"<<endl;
+        cout<<"[3] Print Order"<<endl;
+        cout<<"[4] Finish"<<endl;
+        cout<<"[5] Cancel      ";
+
+        cin >> buf;
         cin.ignore();
+
+        try
+        {
+            selection = stoi(buf);
+        }
+        catch(exception &err)
+        {
+            selection = 6; // error handling => selection = default switch
+        }
+        cout<<endl;
 
         switch (selection)
         {
-        case '1':
+        case 1:
             int itemID;
-            cout << "Add a food with the ID: " << endl;
+            showMenu(menu);
+            cout <<endl<< "Okay, what ID?    ";
             cin >> buf;
             cin.ignore(1000, 10);
 
@@ -140,44 +163,50 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
             catch (exception& err)
             {
                 cout << endl;
-                cout << "exception:" << err.what() << ". Please enter a valid input." << endl;
-                cout << endl;
+                cout << "Please enter a valid ID." << endl;
                 break;
             }
             break;
-        case '2':
-            cout << endl;
-            cout << "Items Cleared." << endl;
+
+        case 2:
+            if (items.empty())
+            {
+                cout<<"Your cart is empty!" <<endl;
+            }
+            else cout << "Ok, all items were removed from cart." << endl;
             deleteItems();
-            cout << endl;
             break;
-        case '3':
+        case 3:
             cout << endl;
-            cout << "Order Details: " << endl;
+            if (items.empty())
+            {
+                cout<<"Your cart is empty!" <<endl;
+                break;
+            }
+            cout << "Your order: ------- " << endl;
             printOrder();
             break;
-        case '4':
+        case 4:
             //finish the order
+            if (menu.empty()) {cout<<"Your cart is empty!" <<endl;
+            break;}
             next = true;
             break;
-        case '5':
+        case 5:
             next = true;
             break;
         default:
-            cout << "Please enter a valid input." << endl;
-            cout << endl;
+            cout << "Please enter a valid option." << endl;
             cin.ignore(1000, 10);
-            //selection = 0;
             break;
         }
 
-    } while (!next);
+    }
+    while (!next);
 
-    //customer finish the order
-    if (selection == '4')
+    //customer finishes the order
+    if (selection == 4)
     {
-        //now need to let customer pay the money
-        //inside the pay function show the price and let
         bool ret = pay();
         if (!ret)
         {
@@ -185,7 +214,7 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
         }
         return ret;
     }
-    else if (selection == '5')  //customer cancel the order
+    else if (selection == 5)  // customer cancels the order
     {
         deleteItems();
         return false;
@@ -196,78 +225,68 @@ bool Order::makeOrder(const vector<MenuItem>& menu)
     }
 }
 
-
+//todo
 bool Order::pay()
 {
     //show the items and their price, the tax(sum of items price*defalut tax rate), total price
     //let user type to pay
+    string buf;
     int input = 0;
+
     while (true)
     {
         getTotal();
-        cout << "The total is: " << totalPayment << endl;
-        cout << "[1 = Pay, -1 = Cancel]" << endl;
-        cin >> input;
+        cout << "The total is: " << fixed << setprecision(2) << totalPayment <<"."<< endl;
+        cout << "[1] Pay" << endl << "[2] Cancel" << endl;
+
+        cin >> buf;
+        cin.ignore();
+
+        try
+        {
+            input = stoi(buf);
+        }
+        catch(exception &err)
+        {
+            input = 3; // error handling => retry
+        }
+
+        cout<<endl;
+
         if (input == 1)
         {
             if (totalPayment == 0)
             {
                 cout << endl;
-                cout << "Total is 0, cancelling order." << endl;
-                cout << endl;
+                cout << "Total is 0... canceling order." << endl;
+                cout<<endl<<endl;
                 return false;
             }
             else
             {
                 cout << endl;
                 cout << "Thank you!" << endl;
-                cout << endl;
-                cout << "Order Details: " << endl;
+                cout << "RECEIPT: ----------" << endl;
                 printOrder();
+                cout<<endl<<endl;
                 return true;
             }
+            break;
         }
-        else if (input == -1)
+        else if (input == 2)
         {
             cout << endl;
-            cout << "Order has been cancelled." << endl;
+            cout << "Okay, your order was cancelled." << endl;
+            cout<<endl;
             return false;
         }
         else
         {
-            cout << "Incorrect number. Please Re-enter." << endl;
+            cout << "Invalid input. Please re-enter." << endl;
         }
     }
 
 }
-
-/*void Order::createOrderItems(vector<MenuItem> menu) // add items to order items randomly
-{
-    srand((unsigned)time(NULL));
-    int maxAmount = rand() % 5;
-    if (rand() % 2) maxAmount = 2;
-    if (maxAmount == 0 || maxAmount == 1) maxAmount = 1;              // max amount of items in order. Most of the time, it's 1.
-    // traverse menu and randomly decide to add MenuItem to order
-    while(true)
-    {
-        int menuIndex = rand()%menu.size();
-        if (items.size() >= maxAmount) return;
-        items.push(menu[menuIndex]);
-        totalPayment += menu[menuIndex].price;
-    }
-    for(int i = 0; i < menu.size() ; i++)
-    {
-        int amount;
-        if (rand()%2) amount = 0;
-        else amount = 1;
-        for(int j = 0; j < amount; j++)
-        {
-            if (items.size() >= maxAmount) return;
-            items.push(menu[i]);
-            totalPayment += menu[i].price;
-        }
-    }
-}*/
 
 void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
 {
@@ -285,6 +304,8 @@ void Order::addItem(int idNum, vector<MenuItem> menu) //Adds Item to Order
             //tempItem.amount = amount;
             //items.insert(pair<MenuItem, int>(tempItem, amount));
             items.push(tempItem);
+
+            cout<<"                  "<<it.name<<" was added to your order."<<endl;
             break;
         }
     }
@@ -314,6 +335,7 @@ int Order::getServiceTime()
 void Order::getTotal()
 {
     totalPayment = 0;
+    double tax = .10;
     queue<MenuItem> copyQueue;
     copyQueue = items;
     for (unsigned int i = 0; i < items.size(); i++)
@@ -321,7 +343,7 @@ void Order::getTotal()
         this->totalPayment += copyQueue.front().price;
         copyQueue.pop();
     }
-    this->totalPayment = this->totalPayment + (this->totalPayment * TAX);
+    this->totalPayment = this->totalPayment + (this->totalPayment * tax);
     //cout << this->totalPayment << endl;
     //return totalPayment;
 }
@@ -350,5 +372,6 @@ string Order::reportStatus() //Returns Order Status
     }
     return returnValue;
 }
+
 
 #endif /* Order_h */
