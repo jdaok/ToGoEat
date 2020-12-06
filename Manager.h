@@ -25,14 +25,14 @@ Manager::Manager() //Default Constructor
 {
     string input;
 
-    cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
+    cout<<"Give your restaurant a name:  ";
     getline(cin, input);
     //cin.ignore(1000,10);
 
-    cout<<"The restaurant name was set to " << input<<"." <<endl;
+    cout<<"The restaurant name was set to " << input<<"." <<endl<<endl;
 
-    // restaurant.name = input;
-    // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl
+   // restaurant.name = input;
+
     if (MENU.empty()) loadMenu(MENU); // in case menu wasn't loaded
     localMenu = MENU;
     showLocalMenu(localMenu);
@@ -86,6 +86,7 @@ int Manager::managerLoop()
         {
             uploadMenuTXT();
             MENU = localMenu;
+            cout<<"Okay, your menu was updated successfully. Exiting...";
             inLoop = false;
             break;
         }
@@ -167,6 +168,7 @@ int Manager::managerLoop()
             cout<< " Incorrect menu ID.. retry!" << endl;
             break;
         }
+
     }
 }
 
