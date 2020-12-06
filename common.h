@@ -72,18 +72,18 @@ void showMenu(const vector<MenuItem>& menu)
     const int width2 = 24;
 
     cout << left << setw(12) << "ID# " <<
-        setw(width2) << "name" <<
-        setw(width2) << "price" << endl;
+         setw(width2) << "name" <<
+         setw(width2) << "price" << endl;
 
     cout << left << setw(12) << "----" <<
-        setw(width2) << "----" <<
-        setw(width2) << "-----" << endl;
+         setw(width2) << "----" <<
+         setw(width2) << "-----" << endl;
 
     for (unsigned int i = 0; i < menu.size(); i++)
     {
         cout << left << setw(12) << menu[i].idNumber <<
-            setw(width2) << menu[i].name <<
-            setw(width2) << menu[i].price << endl;
+             setw(width2) << menu[i].name;
+        cout << fixed << setprecision(2) <<  menu[i].price <<" $"<< endl;
     }
 }
 
@@ -93,36 +93,19 @@ void showLocalMenu(const vector<MenuItem>& menu)
     const int width2 = 24;
 
     cout << left << setw(12) << "ID# " <<
-        setw(width2) << "name" <<
-        setw(width2) << "price" << endl;
+         setw(width2) << "name" <<
+         setw(width2) << "price" << endl;
 
     cout << left << setw(12) << "----" <<
-        setw(width2) << "----" <<
-        setw(width2) << "-----" << endl;
+         setw(width2) << "----" <<
+         setw(width2) << "-----" << endl;
 
     for (unsigned int i = 0; i < menu.size(); i++)
     {
-        cout << left << setw(12) << i <<
-            setw(width2) << menu[i].name <<
-            setw(width2) << menu[i].price << endl;
+        cout << left << setw(12) << i << setw(width2) << menu[i].name;
+        cout << fixed << setprecision(2)  << menu[i].price <<"$"<< endl;
     }
 }
 
-/*void showMenu(const vector<MenuItem> menu)
-{
-    const int width2 = 20;
-    cout << right<<setw(width2) << "ID# " <<
-         setw(width2) << "name" <<
-         setw(width2) << "price" << endl;
-    cout << right<<setw(width2) << "----" <<
-         setw(width2) << "----" <<
-         setw(width2) << "-----" << endl;
-    for (int i = 0; i < menu.size(); i++)
-    {
-        cout << right<<setw(width2) << menu[i].idNumber <<
-             setw(width2) << menu[i].name;
-        cout << fixed << setprecision(2) << setw(width2) << menu[i].price <<" $"<< endl;
-    }
-}*/
 
 #endif /* common */
