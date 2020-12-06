@@ -6,36 +6,42 @@
 #include <cstdlib>
 
 #include <string>
+#include <ios>
 #include <cstring>
 
 #include "Restaurant.h"
 #include "common.h"
-using namespace std;
 
+using namespace std;
 class Manager
 {
     vector<MenuItem> localMenu;
 public:
-    Manager();
-    int managerLoop();
+    Manager(bool, simulationConfig&);
+    int managerLoop(simulationConfig&);
     void uploadMenuTXT();
+    void updateConfigSimulation(simulationConfig&);
 };
 
-Manager::Manager() //Default Constructor
+Manager::Manager(bool hasName, simulationConfig& config) //Default Constructor
 {
-    string input;
+    if (!hasName)
+    {
+        string input;
 
-    cout<<"Give your restaurant a name:  ";
-    getline(cin, input);
-    //cin.ignore(1000,10);
+        cout<<"Give your restaurant a name:  ";
+        getline(cin, input);
+        config.restaurantName = input;
+        cout<<"The restaurant name was set to " << input<<"." <<endl<<endl;
 
-    cout<<"The restaurant name was set to " << input<<"." <<endl<<endl;
+        fstream file("simulation.txt", ios::in | ios::out); // write name to simulation.txt
+        file << config.restaurantName << endl<< config.chefNumber << endl<< config.maxLenWaitQue << endl<< config.timeAtNewArrStop<<endl;
+        file << fixed << setprecision(2) << config.totalRevenue;
 
-   // restaurant.name = input;
+        file.close();
+    }
 
-    if (MENU.empty()) loadMenu(MENU); // in case menu wasn't loaded
     localMenu = MENU;
-    showLocalMenu(localMenu);
 }
 
 void Manager::uploadMenuTXT() // upload vector menu to textfile
@@ -53,7 +59,16 @@ void Manager::uploadMenuTXT() // upload vector menu to textfile
 
 }
 
-int Manager::managerLoop()
+
+void Manager::updateConfigSimulation(simulationConfig& config) // upload vector menu to textfile
+{
+    fstream file("simulation.txt", ios::in | ios::out); // write name to simulation.txt
+    file << config.restaurantName << endl<< config.chefNumber << endl<< config.maxLenWaitQue << endl << config.timeAtNewArrStop << endl;
+    file << fixed << setprecision(2) << config.totalRevenue;
+    file.close();
+}
+
+int Manager::managerLoop(simulationConfig& config)
 {
     string buf2;
     int selection;
@@ -65,7 +80,8 @@ int Manager::managerLoop()
         cout<<"[0] Exit"<<endl;
         cout<<"[1] Add Item"<<endl;
         cout<<"[2] Remove Item"<<endl;
-        cout<<"[3] Print Current Menu      ";
+        cout<<"[3] View Current Menu"<<endl;
+        cout<<"[4] Hire new chef      ";
 
         cin >> buf2;
         cin.ignore();
@@ -77,7 +93,7 @@ int Manager::managerLoop()
         catch(exception &err)
         {
             string temp = err.what();
-            selection = 4; // error handling => selection = default switch
+            selection = 5; // error handling => selection = default switch
         }
         cout<<endl;
 
@@ -87,7 +103,7 @@ int Manager::managerLoop()
         {
             uploadMenuTXT();
             MENU = localMenu;
-            cout<<"Okay, your menu was updated successfully. Exiting...";
+            cout<<"Okay, your menu was updated successfully. Exiting..."<<endl<<endl;
             inLoop = false;
             break;
         }
@@ -166,6 +182,58 @@ int Manager::managerLoop()
         case 3:    // show menu
         {
             showLocalMenu(localMenu);
+            break;
+        }
+        case 4:    // hire new chef
+        {
+            if(config.totalRevenue < 100)
+            {
+                cout<<"You don't have enough money to hire a new chef! :("<<endl<<"Come back when you have 100$.";
+                break;
+            }
+            else
+            {
+                cout<<"Your total balance is " << fixed << setprecision(2) << config.totalRevenue <<"$."<<endl<<"A new chef will be 100$. Would you like to purchase?"<<endl;
+                cout<<"[0] Purchase"<<endl;
+                cout<<"[1] Cancel    ";
+
+                cin >> buf2;
+                cin.ignore();
+
+                try
+                {
+                    selection = stoi(buf2);
+                }
+                catch(exception &err)
+                {
+                    string temp = err.what();
+                    selection = 2; // error handling => selection = default switch
+                }
+
+                switch (selection)
+                {
+                case 0:                     // break
+                {
+                    config.totalRevenue -= 100.00;
+                    config.chefNumber++;
+                    cout<<"Purchased chef for 100$. Your new total balance: ";
+                    cout << fixed << setprecision(2) << config.totalRevenue<<"$. "<<endl;
+                    updateConfigSimulation(config);
+                    break;
+                }
+                case 1:                     // add item
+                {
+                    cout<<"Ok, canceled purchase."<<endl;
+                    break;
+                }
+                default:
+                    cout<< " Incorrect menu ID.. retry!" << endl;
+                    break;
+                }
+            }
+
+
+
             break;
         }
         default:
