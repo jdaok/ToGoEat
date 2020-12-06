@@ -42,13 +42,9 @@ void Manager::uploadMenuTXT() // upload vector menu to textfile
 {
     ofstream outfile("menu.txt", ios_base::out|ios_base::trunc); // overwrite file
 
-    char* token;
-    char buf[1000];
-    const char* const tab = "\t";
-
     outfile<<"-name"<<"\t"<<"price"<<"\t"<<"avgPrepTime"<<endl;
 
-    for(int i=0; i< localMenu.size(); i++)
+    for(unsigned int i=0; i< localMenu.size(); i++)
     {
         outfile<<localMenu[i].name<<"\t"<<localMenu[i].price<<"\t"<<localMenu[i].avgPrepTime<<"\t"<<endl;
     }
@@ -145,17 +141,15 @@ int Manager::managerLoop()
 
             try
             {
-                int deleteIDint = stoi(deleteID);
+                if (stoi(deleteID)<0 || stoi(deleteID) >= localMenu.size())
+                {
+                    cout<<"Please try again and enter a valid integer."<<endl;
+                    break;
+                }
             }
             catch(exception &err)
             {
                 cout << "Please try again and enter a valid integer."<<endl;
-                break;
-            }
-
-            if (stoi(deleteID)<0 || stoi(deleteID) >= localMenu.size())
-            {
-                cout<<"Please try again and enter a valid integer."<<endl;
                 break;
             }
 
