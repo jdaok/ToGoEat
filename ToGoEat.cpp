@@ -154,8 +154,9 @@ int main()
 
         }
 
-        //TODO output the total numer of the order and total amount of money the restaurant made.
-        cout << "Today took " << orderCount << " orders and made $" << totalPrice << endl;
+        //output the total numer of the order and total amount of money the restaurant made.
+        cout << "Today took " << orderCount << " orders and made $" 
+            << fixed << setprecision(2) << totalPrice << endl;
         cout << endl << "Done!" << endl;
     }
 
