@@ -27,7 +27,10 @@ Manager::Manager() //Default Constructor
 
     cout<<"Create your first restaurant!"<<endl<<"Give your restaurant a name:  ";
     getline(cin, input);
-    cin.ignore(1000,10);
+    //cin.ignore(1000,10);
+
+    cout<<"The restaurant name was set to " << input<<"." <<endl;
+
     // restaurant.name = input;
     // cout<<endl<<"Great! Here's the menu for "<<restaurant.name<<"... "<<endl<<endl
     if (MENU.empty()) loadMenu(MENU); // in case menu wasn't loaded
@@ -58,8 +61,9 @@ int Manager::managerLoop()
 {
     string buf2;
     int selection;
+    bool inLoop = true;
 
-    while (true)
+    while (inLoop)
     {
         cout<<endl<<"Pick an action:"<<endl;
         cout<<"[0] Exit"<<endl;
@@ -68,7 +72,7 @@ int Manager::managerLoop()
         cout<<"[3] Print Current Menu      ";
 
         cin >> buf2;
-        cin.ignore(1000,10);
+        cin.ignore();
 
         try
         {
@@ -86,7 +90,7 @@ int Manager::managerLoop()
         {
             uploadMenuTXT();
             MENU = localMenu;
-            return 0;
+            inLoop = false;
             break;
         }
         case 1:                     // add item
