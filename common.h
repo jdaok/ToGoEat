@@ -12,6 +12,8 @@ struct MenuItem
 };
 
 vector<MenuItem> MENU;
+//tax rate
+double TAX = 0.10;
 
 bool loadMenu(vector<MenuItem>&);
 void showMenu(const vector<MenuItem> &);
@@ -77,7 +79,7 @@ void showMenu(const vector<MenuItem>& menu)
         setw(width2) << "----" <<
         setw(width2) << "-----" << endl;
 
-    for (int i = 0; i < menu.size(); i++)
+    for (unsigned int i = 0; i < menu.size(); i++)
     {
         cout << left << setw(12) << menu[i].idNumber <<
             setw(width2) << menu[i].name <<
@@ -98,7 +100,7 @@ void showLocalMenu(const vector<MenuItem>& menu)
         setw(width2) << "----" <<
         setw(width2) << "-----" << endl;
 
-    for (int i = 0; i < menu.size(); i++)
+    for (unsigned int i = 0; i < menu.size(); i++)
     {
         cout << left << setw(12) << i <<
             setw(width2) << menu[i].name <<

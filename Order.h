@@ -323,7 +323,6 @@ int Order::getServiceTime()
 void Order::getTotal()
 {
     totalPayment = 0;
-    double tax = .10;
     queue<MenuItem> copyQueue;
     copyQueue = items;
     for (unsigned int i = 0; i < items.size(); i++)
@@ -331,7 +330,7 @@ void Order::getTotal()
         this->totalPayment += copyQueue.front().price;
         copyQueue.pop();
     }
-    this->totalPayment = this->totalPayment + (this->totalPayment * tax);
+    this->totalPayment = this->totalPayment + (this->totalPayment * TAX);
     //cout << this->totalPayment << endl;
     //return totalPayment;
 }
