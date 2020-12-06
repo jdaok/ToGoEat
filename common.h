@@ -11,7 +11,17 @@ struct MenuItem
     bool finished = false;
 };
 
+struct simulationConfig
+{
+    string restaurantName;
+    int chefNumber; //the number of chefs
+    int timeAtNewArrStop; //the clock time at which new arrivals stop, in minutes(> 0, whole number)
+    int maxLenWaitQue; //the maximum length of the wait queue(1 or more, whole number)
+    double totalRevenue;
+};
+
 vector<MenuItem> MENU;
+
 //tax rate
 double TAX = 0.10;
 
