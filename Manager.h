@@ -73,9 +73,9 @@ int Manager::managerLoop(simulationConfig& config)
     int selection;
     bool inLoop = true;
 
-    while (inLoop)
+    while (inLoop)  // main manager loop
     {
-        cout<<endl<<"Pick an action:"<<endl;
+        cout<<endl<<"Pick an action:"<<endl; // print menuy=
         cout<<"[0] Exit"<<endl;
         cout<<"[1] Add Item"<<endl;
         cout<<"[2] Remove Item"<<endl;
@@ -85,7 +85,7 @@ int Manager::managerLoop(simulationConfig& config)
         cin >> buf2;
         cin.ignore();
 
-        try
+        try // error handling for input
         {
             selection = stoi(buf2);
         }
@@ -98,7 +98,7 @@ int Manager::managerLoop(simulationConfig& config)
 
         switch (selection)
         {
-        case 0:                     // break
+        case 0:                     // break if exit
         {
             uploadMenuTXT();
             MENU = localMenu;
@@ -151,7 +151,7 @@ int Manager::managerLoop(simulationConfig& config)
             break;
 
         }
-        case 2:
+        case 2: // remove an item
         {
             showLocalMenu(localMenu);
             string deleteID;
@@ -187,12 +187,12 @@ int Manager::managerLoop(simulationConfig& config)
         {
             if(config.totalRevenue < 100)
             {
-                cout<<"You don't have enough money to hire a new chef! :("<<endl<<"Come back when you have 100$.";
+                cout<<"You don't have enough money to hire a new chef! :("<<endl<<"Come back when you have 100$."; // not enough money
                 break;
             }
             else
             {
-                cout<<"Your total balance is " << fixed << setprecision(2) << config.totalRevenue <<"$."<<endl<<"A new chef will be 100$. Would you like to purchase?"<<endl;
+                cout<<"Your total balance is " << fixed << setprecision(2) << config.totalRevenue <<"$."<<endl<<"A new chef will be 100$. Would you like to purchase?"<<endl; // confirm
                 cout<<"[0] Purchase"<<endl;
                 cout<<"[1] Cancel    ";
 
@@ -209,7 +209,7 @@ int Manager::managerLoop(simulationConfig& config)
                     selection = 2; // error handling => selection = default switch
                 }
 
-                switch (selection)
+                switch (selection) // confirmed
                 {
                 case 0:                     // break
                 {
@@ -220,7 +220,7 @@ int Manager::managerLoop(simulationConfig& config)
                     updateConfigSimulation(config);
                     break;
                 }
-                case 1:                     // add item
+                case 1:                     // cancelled
                 {
                     cout<<"Ok, canceled purchase."<<endl;
                     break;
@@ -230,18 +230,13 @@ int Manager::managerLoop(simulationConfig& config)
                     break;
                 }
             }
-
-
-
             break;
         }
-        default:
+        default: // error handling
             cout<< " Incorrect menu ID.. retry!" << endl;
             break;
         }
-
     }
-
     return 0;
 }
 
