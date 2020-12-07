@@ -90,6 +90,7 @@ int main()
 
     if (mode == 1)
     {
+        loadMenu(MENU);
         cout<<"You are now the customer!"<<endl;
         int orderCount = 0;
         double dailyRevenue = 0;
